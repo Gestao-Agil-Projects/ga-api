@@ -1,0 +1,41 @@
+services:
+  api: &main_app
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: ga_api:${GA_API_VERSION:-latest}
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      GA_API_HOST: 0.0.0.0
+      GA_API_DB_HOST: ga_api-db
+      GA_API_DB_PORT: 5432
+      GA_API_DB_USER: ga_api
+      GA_API_DB_PASS: ga_api
+      GA_API_DB_BASE: ga_api
+
+  db:
+    image: postgres:16.3-bullseye
+    hostname: ga_api-db
+    environment:
+      POSTGRES_PASSWORD: "ga_api"
+      POSTGRES_USER: "ga_api"
+      POSTGRES_DB: "ga_api"
+    volumes:
+      - ga_api-db-data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: pg_isready -U ga_api
+      interval: 2s
+      timeout: 3s
+      retries: 40
+
+
+
+volumes:
+  ga_api-db-data:
+    name: ga_api-db-data
