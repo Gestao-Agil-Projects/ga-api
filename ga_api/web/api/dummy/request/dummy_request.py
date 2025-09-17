@@ -5,3 +5,4 @@ class DummyRequest(BaseModel):
     """DTO for creating new dummy model."""
 
     name: str
+    age: int

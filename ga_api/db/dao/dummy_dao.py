@@ -4,37 +4,16 @@ from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ga_api.db.dao.abstract_dao import AbstractDAO
 from ga_api.db.dependencies import get_db_session
 from ga_api.db.models.dummy_model import DummyModel
 
 
-class DummyDAO:
+class DummyDAO(AbstractDAO[DummyModel]):
     """Class for accessing dummy table."""
 
     def __init__(self, session: AsyncSession = Depends(get_db_session)) -> None:
-        self.session = session
-
-    async def create_dummy_model(self, name: str) -> None:
-        """
-        Add single dummy to session.
-
-        :param name: name of a dummy.
-        """
-        self.session.add(DummyModel(name=name))
-
-    async def get_all_dummies(self, limit: int, offset: int) -> List[DummyModel]:
-        """
-        Get all dummy models with limit/offset pagination.
-
-        :param limit: limit of dummies.
-        :param offset: offset of dummies.
-        :return: stream of dummies.
-        """
-        raw_dummies = await self.session.execute(
-            select(DummyModel).limit(limit).offset(offset),
-        )
-
-        return list(raw_dummies.scalars().fetchall())
+        super().__init__(model=DummyModel, session=session)
 
     async def filter(self, name: Optional[str] = None) -> List[DummyModel]:
         """
@@ -46,10 +25,11 @@ class DummyDAO:
         query = select(DummyModel)
         if name:
             query = query.where(DummyModel.name == name)
-        rows = await self.session.execute(query)
+        rows = await self._session.execute(query)
         return list(rows.scalars().fetchall())
 
-    async def save(self, dummy: DummyModel) -> DummyModel:
-        self.session.add(dummy)
-        await self.session.flush()
-        return dummy
+    async def find_by_name(self, dummy_name: str) -> DummyModel | None:
+        result = await self._session.execute(
+            select(DummyModel).where(DummyModel.name == dummy_name),
+        )
+        return result.scalar_one_or_none()

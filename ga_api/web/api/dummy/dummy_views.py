@@ -20,11 +20,12 @@ def get_dummy_service(dummy_dao: Annotated[DummyDAO, Depends()]) -> DummyService
 async def get_dummy_models(
     user: Annotated[Any, Depends(current_active_user)],
     dummy_service: Annotated[DummyService, Depends(get_dummy_service)],
+    dummy_id: int | None = None,
     limit: int = 10,
     offset: int = 0,
 ) -> List[DummyResponse]:
 
-    return await dummy_service.get_dummy_models(limit, offset)
+    return await dummy_service.get_dummy_models(limit, offset, dummy_id)  # type: ignore
 
 
 @router.put("/", status_code=204)
@@ -34,3 +35,24 @@ async def create_dummy_model(
 ) -> None:
 
     await dummy_service.create_dummy(request)
+
+
+@router.delete("/", status_code=204)
+async def delete_dummy_model(
+    user: Annotated[Any, Depends(current_active_user)],
+    dummy_service: Annotated[DummyService, Depends(get_dummy_service)],
+    dummy_id: int | None = None,
+    dummy_name: str | None = None,
+) -> None:
+    await dummy_service.delete_dummy(dummy_id, dummy_name)
+
+
+@router.patch("/")
+async def update_dummy_model(
+    user: Annotated[Any, Depends(current_active_user)],
+    dummy_id: int,
+    request: DummyRequest,
+    dummy_service: Annotated[DummyService, Depends(get_dummy_service)],
+) -> DummyResponse:
+
+    return await dummy_service.update_dummy(dummy_id, request)  # type: ignore

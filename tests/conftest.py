@@ -146,10 +146,10 @@ async def save_and_expect(
     object_to_save: Any,
     expected_quantity: int,
 ) -> None:
-    dao.session.add(object_to_save)
-    await dao.session.commit()
+    dao._session.add(object_to_save)
+    await dao._session.commit()
 
-    result = await dao.session.execute(select(type(object_to_save)))
+    result = await dao._session.execute(select(type(object_to_save)))
     all_data = result.scalars().all()
 
     assert len(all_data) == expected_quantity
