@@ -26,6 +26,7 @@ SQLAlchemy = {version = "^2.0.36", extras = ["asyncio"]}
 asyncpg = {version = "^0.30.0", extras = ["sa"]}
 httptools = "^0.6.4"
 pymongo = "^4.10.1"
+fastapi-mail = "^1.5.0"
 
 
 [tool.poetry.group.dev.dependencies]
