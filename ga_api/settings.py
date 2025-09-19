@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 from tempfile import gettempdir
 
-from pydantic import EmailStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from yarl import URL
 
@@ -29,7 +28,7 @@ class Settings(BaseSettings):
     with environment variables.
     """
 
-    mail_username: EmailStr = os.getenv("MAIL_USERNAME", "")
+    mail_username: str = os.getenv("MAIL_USERNAME", "")
     mail_password: str = os.getenv("MAIL_PASSWORD", "")
     mail_server: str = os.getenv("MAIL_SERVER", "")
     mail_port: str = os.getenv("MAIL_PORT", "")
