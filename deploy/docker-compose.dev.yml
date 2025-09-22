@@ -11,3 +11,6 @@ services:
     environment:
       # Enables autoreload.
       GA_API_RELOAD: "True"
+  db:
+    ports:
+    - "5432:5432"
