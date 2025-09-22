@@ -1,4 +1,6 @@
 import uuid
+from datetime import date, datetime
+from typing import Optional
 
 from fastapi import Depends
 from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin, schemas
@@ -8,16 +10,41 @@ from fastapi_users.authentication import (
     JWTStrategy,
 )
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
+from sqlalchemy import String, Date, TIMESTAMP, func
+from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Mapped, mapped_column
 
 from ga_api.db.base import Base
 from ga_api.db.dependencies import get_db_session
+from ga_api.enums.consultation_frequency import ConsultationFrequency
+from ga_api.enums.user_role import UserRole
 from ga_api.settings import settings
 
 
 class User(SQLAlchemyBaseUserTableUUID, Base):
-    """Represents a user entity."""
+    __tablenae__ = "users"
 
+    full_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    birth_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+
+    frquency : Mapped[ConsultationFrequency] = mapped_column(
+        SQLAlchemyEnum(ConsultationFrequency), nullable=False, default=ConsultationFrequency.AS_NEEDED
+    )
+
+    role: Mapped[UserRole] = mapped_column(
+        SQLAlchemyEnum(UserRole), nullable=False, default=UserRole.PATIENT
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
     """Represents a read command for a user."""
