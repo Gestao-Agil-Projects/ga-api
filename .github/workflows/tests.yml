@@ -1,6 +1,14 @@
 name: Testing ga_api
 
-on: push
+on:
+  push:
+    branches:
+      - main
+      - hlg
+  pull_request:
+    branches:
+      - main
+      - hlg
 
 jobs:
   lint:
