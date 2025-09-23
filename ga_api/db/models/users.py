@@ -28,6 +28,8 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     birth_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     full_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    image_url: Mapped[str] = mapped_column(String(500), nullable=True)
+    bio: Mapped[str] = mapped_column(String(200), nullable=True)
 
     frequency: Mapped[ConsultationFrequency] = mapped_column(
         SQLAlchemyEnum(ConsultationFrequency),
@@ -54,15 +56,20 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
-    """Represents a read command for a user."""
+    full_name: str
 
 
 class UserCreate(schemas.BaseUserCreate):
-    """Represents a create command for a user."""
+    full_name: str
+    birth_date: Optional[date] = None
+    phone: Optional[str] = None
+    frequency: ConsultationFrequency = ConsultationFrequency.AS_NEEDED
+    role: UserRole = UserRole.PATIENT
 
 
 class UserUpdate(schemas.BaseUserUpdate):
-    """Represents an update command for a user."""
+    phone: Optional[str] = None
+    frequency: ConsultationFrequency = ConsultationFrequency.AS_NEEDED
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):

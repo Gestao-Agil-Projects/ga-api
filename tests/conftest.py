@@ -122,10 +122,10 @@ async def register_user(
         json={
             "email": email,
             "password": password,
-            "full_name": full_name,
             "is_active": False,
             "is_superuser": False,
             "is_verified": False,
+            "full_name": full_name,
         },
     )
 
