@@ -1,8 +1,9 @@
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, List
 
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient, Response
+from pydantic.v1 import EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -11,10 +12,14 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from ga_api.db.base import Base
+from ga_api.db.dao.abstract_dao import AbstractDAO
 from ga_api.db.dependencies import get_db_session
+from ga_api.db.models.users import UserCreate
 from ga_api.db.utils import create_database, drop_database
 from ga_api.settings import settings
 from ga_api.web.application import get_app
+from tests.factories.user_factory import UserFactory
 
 
 @pytest.fixture(scope="session")
@@ -111,22 +116,10 @@ async def client(
         yield ac
 
 
-async def register_user(
-    client: AsyncClient,
-    email: str,
-    password: str,
-    full_name: str,
-) -> None:
+async def register_user(client: AsyncClient, request: UserCreate) -> None:
     await client.post(
         "/api/auth/register",
-        json={
-            "email": email,
-            "password": password,
-            "is_active": False,
-            "is_superuser": False,
-            "is_verified": False,
-            "full_name": full_name,
-        },
+        json=request.model_dump(),
     )
 
 
@@ -139,25 +132,31 @@ async def login_user(client: AsyncClient, email: str, password: str) -> str:
 
 
 async def register_and_login_default_user(client: AsyncClient) -> str:
-    await register_user(
-        client=client,
-        email="mock@mail.com",
-        password="password123",
-        full_name="teste",
+    user_request: UserCreate = UserFactory.create_default_user_create()
+    await register_user(client, user_request)
+    return await login_user(
+        client, email=str(user_request.email), password=user_request.password
     )
-    return await login_user(client, email="mock@mail.com", password="password123")
 
 
 async def save_and_expect(
-    dao: Any,
-    object_to_save: Any,
+    dao: AbstractDAO[Any],
+    object_to_save: Base | List[Base],
     expected_quantity: int,
 ) -> None:
-    dao._session.add(object_to_save)
-    await dao._session.commit()
+    object_list: bool = isinstance(object_to_save, list)
 
-    result = await dao._session.execute(select(type(object_to_save)))
-    all_data = result.scalars().all()
+    if object_list:
+        await dao.save_all(object_to_save)
 
-    assert len(all_data) == expected_quantity
-    assert all(isinstance(item, type(object_to_save)) for item in all_data)
+    else:
+        await dao.save(object_to_save)
+
+    result = await dao.find_all()
+
+    expected_type: Any = (
+        type(object_to_save[0]) if object_list else type(object_to_save)
+    )
+
+    assert len(result) == expected_quantity
+    assert all(isinstance(item, expected_type) for item in result)

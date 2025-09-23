@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import Any, Generic, List, Optional, Type, TypeVar
 from uuid import UUID
 
@@ -11,7 +12,7 @@ from ga_api.db.dependencies import get_db_session
 T = TypeVar("T")
 
 
-class AbstractDAO(Generic[T]):
+class AbstractDAO(Generic[T], ABC):
     """
     Abstract DAO for generic CRUD operations on any model.
     """
@@ -38,6 +39,21 @@ class AbstractDAO(Generic[T]):
             raise HTTPException(status_code=400, detail="Object already exists") from e
 
         return obj
+
+    async def save_all(self, obj_list: List[T]) -> List[T]:
+        """
+        Saves an object list to the database.
+        Raises HTTP 400 if it already exists (IntegrityError).
+        """
+        self._session.add_all(obj_list)
+
+        try:
+            await self._session.flush()
+        except IntegrityError as e:
+            await self._session.rollback()
+            raise HTTPException(status_code=400, detail="Object already exists") from e
+
+        return obj_list
 
     async def find_by_id(self, obj_id: UUID | int) -> Optional[T]:
         """
