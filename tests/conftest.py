@@ -115,11 +115,18 @@ async def register_user(
     client: AsyncClient,
     email: str,
     password: str,
-    teste: str,
+    full_name: str,
 ) -> None:
     await client.post(
         "/api/auth/register",
-        json={"email": email, "password": password, "teste": teste},
+        json={
+            "email": email,
+            "password": password,
+            "full_name": full_name,
+            "is_active": False,
+            "is_superuser": False,
+            "is_verified": False,
+        },
     )
 
 
@@ -133,10 +140,10 @@ async def login_user(client: AsyncClient, email: str, password: str) -> str:
 
 async def register_and_login_default_user(client: AsyncClient) -> str:
     await register_user(
-        client,
+        client=client,
         email="mock@mail.com",
         password="password123",
-        teste="test",
+        full_name="teste",
     )
     return await login_user(client, email="mock@mail.com", password="password123")
 

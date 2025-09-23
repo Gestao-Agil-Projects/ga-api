@@ -1,6 +1,7 @@
-import enum
+from enum import Enum
 
-class ConsultationFrequency(str, enum.Enum):
+
+class ConsultationFrequency(str, Enum):
     WEEKLY = "weekly"
     BIWEEKLY = "biweekly"
     MONTHLY = "monthly"

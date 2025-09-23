@@ -10,7 +10,7 @@ from fastapi_users.authentication import (
     JWTStrategy,
 )
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
-from sqlalchemy import String, Date, TIMESTAMP, func
+from sqlalchemy import TIMESTAMP, Date, String, func
 from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
@@ -23,21 +23,27 @@ from ga_api.settings import settings
 
 
 class User(SQLAlchemyBaseUserTableUUID, Base):
-    __tablenae__ = "users"
 
-    full_name: Mapped[str] = mapped_column(String(200), nullable=False)
-    phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    __tablename__ = "users"
     birth_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    full_name: Mapped[str] = mapped_column(String(200), nullable=False)
 
-    frquency : Mapped[ConsultationFrequency] = mapped_column(
-        SQLAlchemyEnum(ConsultationFrequency), nullable=False, default=ConsultationFrequency.AS_NEEDED
+    frequency: Mapped[ConsultationFrequency] = mapped_column(
+        SQLAlchemyEnum(ConsultationFrequency),
+        nullable=False,
+        default=ConsultationFrequency.AS_NEEDED,
     )
 
     role: Mapped[UserRole] = mapped_column(
-        SQLAlchemyEnum(UserRole), nullable=False, default=UserRole.PATIENT
+        SQLAlchemyEnum(UserRole),
+        nullable=False,
+        default=UserRole.PATIENT,
     )
     created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
     )
     updated_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
@@ -45,6 +51,7 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
     """Represents a read command for a user."""
@@ -91,7 +98,7 @@ async def get_user_manager(
 
 def get_jwt_strategy() -> JWTStrategy:
     """
-    Return a JWTStrategy in order to instantiate it dynamically.
+    Return a JWTStrategy in orderto instantiate it dynamically.
 
     :returns: instance of JWTStrategy with provided settings.
     """
