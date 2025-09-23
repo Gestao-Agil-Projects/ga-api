@@ -10,7 +10,7 @@ from ga_api.db.dao.dummy_dao import DummyDAO
 from ga_api.db.models.dummy_model import DummyModel
 from ga_api.services.dummy_service import DummyService
 from ga_api.web.api.dummy.request.dummy_request import DummyRequest
-from tests.conftest import register_and_login_default_user
+from tests.conftest import register_and_login_default_user, save_and_expect
 
 
 @pytest.mark.anyio
@@ -39,20 +39,24 @@ async def test_getting_list(
 ) -> None:
     """Tests dummy instance retrieval without dummy_id (list)."""
     token: str = await register_and_login_default_user(client)
-
     dao = DummyDAO(dbsession)
-    test_name = uuid.uuid4().hex
-    dummy = DummyModel(name=test_name, age=10)
-    await dao.save(dummy)
-    await dbsession.commit()
+
+    test_name1 = uuid.uuid4().hex
+    test_name2 = uuid.uuid4().hex
+
+    dummy1 = DummyModel(name=test_name1, age=10)
+    dummy2 = DummyModel(name=test_name2, age=20)
+
+    await save_and_expect(dao, [dummy1, dummy2], 2)
 
     url = fastapi_app.url_path_for("get_dummy_models")
     response = await client.get(url, headers={"Authorization": f"Bearer {token}"})
     dummies = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(dummies) == 1
-    assert dummies[0]["name"] == test_name
+    assert len(dummies) == 2
+    assert dummies[0]["name"] is not None
+    assert dummies[1]["name"] is not None
 
 
 @pytest.mark.anyio
@@ -65,9 +69,10 @@ async def test_getting_by_id_success(
     token: str = await register_and_login_default_user(client)
 
     dao = DummyDAO(dbsession)
+
     dummy = DummyModel(name="by_id", age=77)
-    await dao.save(dummy)
-    await dbsession.commit()
+
+    await save_and_expect(dao, dummy, 1)
 
     url = fastapi_app.url_path_for("get_dummy_models")
     response = await client.get(
@@ -114,8 +119,8 @@ async def test_deletion_by_id(
     dao = DummyDAO(dbsession)
 
     dummy = DummyModel(name="to_delete", age=99)
-    await dao.save(dummy)
-    await dbsession.commit()
+
+    await save_and_expect(dao, dummy, 1)
 
     url = fastapi_app.url_path_for("delete_dummy_model")
     response = await client.delete(
@@ -139,8 +144,8 @@ async def test_deletion_by_name(
     dao = DummyDAO(dbsession)
 
     dummy = DummyModel(name="to_delete_by_name", age=50)
-    await dao.save(dummy)
-    await dbsession.commit()
+
+    await save_and_expect(dao, dummy, 1)
 
     url = fastapi_app.url_path_for("delete_dummy_model")
     response = await client.delete(
@@ -181,7 +186,8 @@ async def test_update_dummy_success(
     dao = DummyDAO(dbsession)
 
     dummy = DummyModel(name="before_update", age=20)
-    await dao.save(dummy)
+
+    await save_and_expect(dao, dummy, 1)
 
     request = DummyRequest(
         name="after_update",

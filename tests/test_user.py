@@ -1,9 +1,11 @@
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient, Response
+from pydantic.v1 import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
+from ga_api.db.models.users import UserCreate
 from tests.conftest import register_and_login_default_user, register_user
 
 
@@ -36,9 +38,10 @@ async def test_login_user(
 ) -> None:
     email = "foo@mail.com"
     password = "pass123"
-    teste = ""
 
-    await register_user(client, email, password, teste)
+    user_request: UserCreate = UserCreate(email=email, password=password)  # type: ignore
+
+    await register_user(client, user_request)
 
     response: Response = await client.post(
         "/api/auth/jwt/login",
@@ -49,8 +52,6 @@ async def test_login_user(
     body = response.json()
     assert "access_token" in body
     assert body["token_type"] == "bearer"
-
-    return body["access_token"]
 
 
 @pytest.mark.anyio
