@@ -15,11 +15,11 @@ async def test_register_user(
 ) -> None:
     email = "foo@mail.com"
     password = "pass123"
-    teste = "123"
+    full_name = "123"
 
     response: Response = await client.post(
         "/api/auth/register",
-        json={"email": email, "password": password, "teste": teste},
+        json={"email": email, "password": password, "full_name": full_name},
     )
 
     assert response.status_code == status.HTTP_201_CREATED
@@ -36,9 +36,9 @@ async def test_login_user(
 ) -> None:
     email = "foo@mail.com"
     password = "pass123"
-    teste = ""
+    full_name = "po"
 
-    await register_user(client, email, password, teste)
+    await register_user(client, email, password, full_name)
 
     response: Response = await client.post(
         "/api/auth/jwt/login",
