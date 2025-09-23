@@ -1,12 +1,12 @@
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient, Response
-from pydantic.v1 import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from ga_api.db.models.users import UserCreate
 from tests.conftest import register_and_login_default_user, register_user
+from tests.factories.user_factory import UserFactory
 
 
 @pytest.mark.anyio
@@ -17,11 +17,13 @@ async def test_register_user(
 ) -> None:
     email = "foo@mail.com"
     password = "pass123"
-    teste = "123"
+    full_name = "123"
+
+    user_create_request: UserCreate = UserCreate(email=email, password=password, full_name=full_name)  # type: ignore
 
     response: Response = await client.post(
         "/api/auth/register",
-        json={"email": email, "password": password, "teste": teste},
+        json=user_create_request.model_dump(),
     )
 
     assert response.status_code == status.HTTP_201_CREATED
@@ -36,16 +38,13 @@ async def test_login_user(
     client: AsyncClient,
     dbsession: AsyncSession,
 ) -> None:
-    email = "foo@mail.com"
-    password = "pass123"
-
-    user_request: UserCreate = UserCreate(email=email, password=password)  # type: ignore
+    user_request: UserCreate = UserFactory.create_default_user_create()
 
     await register_user(client, user_request)
 
     response: Response = await client.post(
         "/api/auth/jwt/login",
-        data={"username": email, "password": password},
+        data={"username": user_request.email, "password": user_request.password},
     )
 
     assert response.status_code == status.HTTP_200_OK

@@ -8,4 +8,5 @@ class UserFactory:
         return UserCreate(
             email="mock@mail.com",  # type: ignore
             password="password123",
+            full_name="john",
         )
