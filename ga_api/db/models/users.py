@@ -25,6 +25,7 @@ from ga_api.settings import settings
 class User(SQLAlchemyBaseUserTableUUID, Base):
 
     __tablename__ = "users"
+    cpf: Mapped[str] = mapped_column(String(11), nullable=False, unique=True)
     birth_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     full_name: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -57,10 +58,12 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
     full_name: str
+    cpf: str
 
 
 class UserCreate(schemas.BaseUserCreate):
     full_name: str
+    cpf: str
     birth_date: Optional[date] = None
     phone: Optional[str] = None
     frequency: ConsultationFrequency = ConsultationFrequency.AS_NEEDED
