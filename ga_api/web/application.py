@@ -2,6 +2,7 @@ from importlib import metadata
 
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
+from starlette.middleware.cors import CORSMiddleware
 
 from ga_api.web.api.router import api_router
 from ga_api.web.lifespan import lifespan_setup
@@ -27,5 +28,13 @@ def get_app() -> FastAPI:
 
     # Main router for the API.
     app.include_router(router=api_router, prefix="/api")
+
+    app.add_middleware(
+        CORSMiddleware,  # type: ignore
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     return app
