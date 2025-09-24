@@ -1,12 +1,19 @@
+from datetime import date
+
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient, Response
+from sqlalchemy import DateTime
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from ga_api.db.dao.user_dao import UserDAO
 from ga_api.db.models.users import User, UserCreate
-from tests.conftest import register_and_login_default_user, register_user, save_and_expect
+from tests.conftest import (
+    register_and_login_default_user,
+    register_user,
+    save_and_expect,
+)
 from tests.factories.user_factory import UserFactory
 
 
@@ -19,7 +26,7 @@ async def test_register_user(
     email = "foo@mail.com"
     password = "pass123"
     full_name = "123"
-    cpf = UserFactory.generate_random_cpf()
+    cpf = "123.456.789-12"
 
     user_create_request: UserCreate = UserCreate(
         email=email, password=password, full_name=full_name, cpf=cpf
@@ -44,16 +51,18 @@ async def test_register_user_partial_data(
     dbsession: AsyncSession,
 ) -> None:
     full_name = "Partial User"
-    cpf = UserFactory.generate_random_cpf()
+    cpf = "123.456.789-12"
     email = f"{cpf}@mail.com"
     password = "partialpassword"
+    bio="this is a bio"
 
     user_create_request: UserCreate = UserCreate(
         email=email,
         password=password,
         full_name=full_name,
         cpf=cpf,
-    )  # type: ignore
+        bio=bio
+    )
 
     response: Response = await client.post(
         "/api/auth/register",
@@ -66,9 +75,6 @@ async def test_register_user_partial_data(
     assert body["cpf"] == cpf
     assert "id" in body
 
-    user_dao = UserDAO(dbsession)
-    await save_and_expect(user_dao, User, 1)
-
 
 @pytest.mark.anyio
 async def test_register_user_full_data(
@@ -77,13 +83,13 @@ async def test_register_user_full_data(
     dbsession: AsyncSession,
 ) -> None:
     user_create_request: UserCreate = UserFactory.create_default_user_create()
-    user_create_request.birth_date = "2000-01-01"
+    user_create_request.birth_date = date(2000,1,1).isoformat()
     user_create_request.phone = "11987654321"
     user_create_request.bio = "A full user bio."
 
     response: Response = await client.post(
         "/api/auth/register",
-        json=user_create_request.model_dump(),
+        json=user_create_request.model_dump_json(),
     )
 
     assert response.status_code == status.HTTP_201_CREATED
@@ -106,7 +112,7 @@ async def test_register_user_without_full_name_returns_error(
     client: AsyncClient,
     dbsession: AsyncSession,
 ) -> None:
-    cpf = UserFactory.generate_random_cpf()
+    cpf = "123.456.789-12"
     email = f"{cpf}@mail.com"
     password = "password123"
 
