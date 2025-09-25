@@ -9,6 +9,8 @@ from starlette import status
 
 from ga_api.db.dao.user_dao import UserDAO
 from ga_api.db.models.users import User, UserCreate
+from ga_api.enums.consultation_frequency import ConsultationFrequency
+from ga_api.enums.user_role import UserRole
 from tests.conftest import (
     register_and_login_default_user,
     register_user,
@@ -40,7 +42,6 @@ async def test_register_user(
     assert response.status_code == status.HTTP_201_CREATED
     body = response.json()
     assert body["email"] == email
-    assert body["cpf"] == cpf
     assert "id" in body
 
 
@@ -50,30 +51,24 @@ async def test_register_user_partial_data(
     client: AsyncClient,
     dbsession: AsyncSession,
 ) -> None:
-    full_name = "Partial User"
-    cpf = "123.456.789-12"
-    email = f"{cpf}@mail.com"
-    password = "partialpassword"
-    bio="this is a bio"
-
-    user_create_request: UserCreate = UserCreate(
-        email=email,
-        password=password,
-        full_name=full_name,
-        cpf=cpf,
-        bio=bio
-    )
+    user_create_request: UserCreate = UserFactory.create_minimal_user_request()
 
     response: Response = await client.post(
         "/api/auth/register",
-        json=user_create_request.model_dump(),
+        json=user_create_request.model_dump(mode="json"),
     )
 
     assert response.status_code == status.HTTP_201_CREATED
     body = response.json()
-    assert body["full_name"] == full_name
-    assert body["cpf"] == cpf
+
     assert "id" in body
+    assert body["email"] == user_create_request.email
+    assert body["full_name"] == user_create_request.full_name
+    assert body["role"] == UserRole.PATIENT.value
+    assert body["frequency"] == ConsultationFrequency.AS_NEEDED.value
+    assert body.get("bio") is None
+    assert body.get("phone") is None
+    assert body.get("birth_date") is None
 
 
 @pytest.mark.anyio
@@ -82,28 +77,24 @@ async def test_register_user_full_data(
     client: AsyncClient,
     dbsession: AsyncSession,
 ) -> None:
-    user_create_request: UserCreate = UserFactory.create_default_user_create()
-    user_create_request.birth_date = date(2000,1,1).isoformat()
-    user_create_request.phone = "11987654321"
-    user_create_request.bio = "A full user bio."
+    user_create_request: UserCreate = UserFactory.create_default_user_request()
 
     response: Response = await client.post(
         "/api/auth/register",
-        json=user_create_request.model_dump_json(),
+        json=user_create_request.model_dump(mode="json"),
     )
 
     assert response.status_code == status.HTTP_201_CREATED
     body = response.json()
+
+    assert "id" in body
     assert body["email"] == user_create_request.email
     assert body["full_name"] == user_create_request.full_name
-    assert body["cpf"] == user_create_request.cpf
-    assert body["birth_date"] == "2000-01-01"
-    assert body["phone"] == "11987654321"
-    assert body["bio"] == "A full user bio."
-    assert "id" in body
-
-    user_dao = UserDAO(dbsession)
-    await save_and_expect(user_dao, User, 1)
+    assert body["birth_date"] == user_create_request.birth_date.isoformat()
+    assert body["phone"] == user_create_request.phone
+    assert body["bio"] == user_create_request.bio
+    assert body["role"] == UserRole.PATIENT.value
+    assert "cpf" not in body
 
 
 @pytest.mark.anyio
@@ -112,20 +103,12 @@ async def test_register_user_without_full_name_returns_error(
     client: AsyncClient,
     dbsession: AsyncSession,
 ) -> None:
-    cpf = "123.456.789-12"
-    email = f"{cpf}@mail.com"
-    password = "password123"
-
-    user_create_request: UserCreate = UserCreate(
-        email=email,
-        password=password,
-        full_name=None,  # type: ignore
-        cpf=cpf,
-    )
+    user_create_request: UserCreate = UserFactory.create_default_user_request()
+    user_create_request.full_name = None
 
     response: Response = await client.post(
         "/api/auth/register",
-        json=user_create_request.model_dump(exclude_unset=True),
+        json=user_create_request.model_dump(mode="json"),
     )
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -139,20 +122,12 @@ async def test_register_user_without_cpf_returns_error(
     client: AsyncClient,
     dbsession: AsyncSession,
 ) -> None:
-    full_name = "No CPF User"
-    email = "nocpf@mail.com"
-    password = "password123"
-
-    user_create_request: UserCreate = UserCreate(
-        email=email,
-        password=password,
-        full_name=full_name,
-        cpf=None,  # type: ignore
-    )
+    user_create_request: UserCreate = UserFactory.create_default_user_request()
+    user_create_request.cpf = None
 
     response: Response = await client.post(
         "/api/auth/register",
-        json=user_create_request.model_dump(exclude_unset=True),
+        json=user_create_request.model_dump(mode="json"),
     )
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -166,7 +141,7 @@ async def test_login_user(
     client: AsyncClient,
     dbsession: AsyncSession,
 ) -> None:
-    user_request: UserCreate = UserFactory.create_default_user_create()
+    user_request: UserCreate = UserFactory.create_default_user_request()
 
     await register_user(client, user_request)
 

@@ -10,6 +10,7 @@ from fastapi_users.authentication import (
     JWTStrategy,
 )
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
+from pydantic import HttpUrl
 from sqlalchemy import TIMESTAMP, Date, String, func
 from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -57,23 +58,31 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
+    birth_date: Optional[date] = None
+    phone: Optional[str] = None
     full_name: str
-    cpf: str
+    image_url: Optional[HttpUrl] = None
+    bio: Optional[str] = None
+    frequency: ConsultationFrequency
+    role: UserRole
 
 
 class UserCreate(schemas.BaseUserCreate):
-    full_name: str
     cpf: str
     birth_date: Optional[date] = None
     phone: Optional[str] = None
-    frequency: ConsultationFrequency = ConsultationFrequency.AS_NEEDED
-    role: UserRole = UserRole.PATIENT
+    full_name: str
+    image_url: Optional[HttpUrl] = None
     bio: Optional[str] = None
+    frequency: ConsultationFrequency = ConsultationFrequency.AS_NEEDED
 
 
 class UserUpdate(schemas.BaseUserUpdate):
+    birth_date: Optional[date] = None
     phone: Optional[str] = None
-    frequency: ConsultationFrequency = ConsultationFrequency.AS_NEEDED
+    image_url: Optional[HttpUrl] = None
+    bio: Optional[str] = None
+    frequency: Optional[ConsultationFrequency] = None
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
