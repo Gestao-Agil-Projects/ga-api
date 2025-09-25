@@ -1,5 +1,8 @@
+from logging import warning
+
 from sqlalchemy import text
 from sqlalchemy.engine import make_url
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from ga_api.settings import settings
@@ -42,3 +45,15 @@ async def drop_database() -> None:
         )
         await conn.execute(text(disc_users))
         await conn.execute(text(f'DROP DATABASE "{settings.db_base}"'))
+
+
+def create_generic_integrity_error_message(e: IntegrityError) -> str:
+    detail_msg = "Integrity constraint violation."
+    try:
+        constraint = str(e.orig).split("constraint ")[1].split('"')[1]
+        if constraint.endswith("_key"):
+            field_name = constraint.replace("users_", "").replace("_key", "")
+            detail_msg = f"{field_name.replace('_', ' ').capitalize()} already exists."
+    except Exception as ex:
+        warning("Failed to parse constraint from IntegrityError: %s", ex)
+    return detail_msg
