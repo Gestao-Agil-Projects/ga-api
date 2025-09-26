@@ -12,11 +12,15 @@ from fastapi_users.authentication import (
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
 from sqlalchemy import TIMESTAMP, Date, String, func
 from sqlalchemy import Enum as SQLAlchemyEnum
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
+from starlette.exceptions import HTTPException
+from starlette.requests import Request
 
 from ga_api.db.base import Base
 from ga_api.db.dependencies import get_db_session
+from ga_api.db.utils import create_generic_integrity_error_message
 from ga_api.enums.consultation_frequency import ConsultationFrequency
 from ga_api.enums.user_role import UserRole
 from ga_api.settings import settings
@@ -25,10 +29,11 @@ from ga_api.settings import settings
 class User(SQLAlchemyBaseUserTableUUID, Base):
 
     __tablename__ = "users"
+    cpf: Mapped[str] = mapped_column(String(14), nullable=False, unique=True)
     birth_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     full_name: Mapped[str] = mapped_column(String(200), nullable=False)
-    image_url: Mapped[str] = mapped_column(String(500), nullable=True)
+    image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     bio: Mapped[str] = mapped_column(String(200), nullable=True)
 
     frequency: Mapped[ConsultationFrequency] = mapped_column(
@@ -56,27 +61,54 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
+    birth_date: Optional[date] = None
+    phone: Optional[str] = None
     full_name: str
+    image_url: Optional[str] = None
+    bio: Optional[str] = None
+    frequency: ConsultationFrequency
+    role: UserRole
 
 
 class UserCreate(schemas.BaseUserCreate):
-    full_name: str
+    cpf: str
     birth_date: Optional[date] = None
     phone: Optional[str] = None
+    full_name: str
+    image_url: Optional[str] = None
+    bio: Optional[str] = None
     frequency: ConsultationFrequency = ConsultationFrequency.AS_NEEDED
-    role: UserRole = UserRole.PATIENT
 
 
 class UserUpdate(schemas.BaseUserUpdate):
+    birth_date: Optional[date] = None
     phone: Optional[str] = None
-    frequency: ConsultationFrequency = ConsultationFrequency.AS_NEEDED
+    image_url: Optional[str] = None
+    bio: Optional[str] = None
+    frequency: Optional[ConsultationFrequency] = None
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
-    """Manages a user session and its tokens."""
-
     reset_password_token_secret = settings.users_secret
     verification_token_secret = settings.users_secret
+
+    async def create(
+        self,
+        user_create: UserCreate,
+        safe: bool = False,
+        request: Optional[Request] = None,
+    ) -> User:
+        session: AsyncSession = self.user_db.session  # type: ignore
+        try:
+            return await super().create(user_create, safe, request)
+
+        except IntegrityError as e:
+            await session.rollback()
+            detail: str = create_generic_integrity_error_message(e)
+            raise HTTPException(
+                status_code=400,
+                detail=detail,
+            ) from e
 
 
 async def get_user_db(
