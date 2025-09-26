@@ -10,7 +10,6 @@ from fastapi_users.authentication import (
     JWTStrategy,
 )
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
-from pydantic import HttpUrl
 from sqlalchemy import TIMESTAMP, Date, String, func
 from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy.exc import IntegrityError
@@ -34,7 +33,7 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     birth_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     full_name: Mapped[str] = mapped_column(String(200), nullable=False)
-    image_url: Mapped[str] = mapped_column(String(500), nullable=True)
+    image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     bio: Mapped[str] = mapped_column(String(200), nullable=True)
 
     frequency: Mapped[ConsultationFrequency] = mapped_column(
@@ -65,7 +64,7 @@ class UserRead(schemas.BaseUser[uuid.UUID]):
     birth_date: Optional[date] = None
     phone: Optional[str] = None
     full_name: str
-    image_url: Optional[HttpUrl] = None
+    image_url: Optional[str] = None
     bio: Optional[str] = None
     frequency: ConsultationFrequency
     role: UserRole
@@ -76,7 +75,7 @@ class UserCreate(schemas.BaseUserCreate):
     birth_date: Optional[date] = None
     phone: Optional[str] = None
     full_name: str
-    image_url: Optional[HttpUrl] = None
+    image_url: Optional[str] = None
     bio: Optional[str] = None
     frequency: ConsultationFrequency = ConsultationFrequency.AS_NEEDED
 
@@ -84,7 +83,7 @@ class UserCreate(schemas.BaseUserCreate):
 class UserUpdate(schemas.BaseUserUpdate):
     birth_date: Optional[date] = None
     phone: Optional[str] = None
-    image_url: Optional[HttpUrl] = None
+    image_url: Optional[str] = None
     bio: Optional[str] = None
     frequency: Optional[ConsultationFrequency] = None
 
