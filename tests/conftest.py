@@ -119,7 +119,7 @@ async def client(
 async def register_user(client: AsyncClient, request: UserCreate) -> None:
     await client.post(
         "/api/auth/register",
-        json=request.model_dump(),
+        json=request.model_dump(mode="json"),
     )
 
 
@@ -132,7 +132,7 @@ async def login_user(client: AsyncClient, email: str, password: str) -> str:
 
 
 async def register_and_login_default_user(client: AsyncClient) -> str:
-    user_request: UserCreate = UserFactory.create_default_user_create()
+    user_request: UserCreate = UserFactory.create_default_user_request()
     await register_user(client, user_request)
     return await login_user(
         client, email=str(user_request.email), password=user_request.password
