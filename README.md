@@ -6,7 +6,7 @@ This project was generated using fastapi_template.
 
 ## Setup
 Para iniciar o projeto, você deve ter as ferramentas instaladas:
-- [Python 3.17.7+](https://www.python.org/downloads/)
+- [Python 3.13.7+](https://www.python.org/downloads/)
 - [Poetry](https://python-poetry.org/docs/#installation)
 - [Docker](https://docs.docker.com/get-docker/)
 
