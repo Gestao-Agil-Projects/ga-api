@@ -1,4 +1,3 @@
-import random
 from datetime import date
 
 from ga_api.db.models.users import UserCreate

@@ -8,9 +8,8 @@ from starlette import status
 
 from ga_api.db.dao.dummy_dao import DummyDAO
 from ga_api.db.models.dummy_model import DummyModel
-from ga_api.services.dummy_service import DummyService
 from ga_api.web.api.dummy.request.dummy_request import DummyRequest
-from tests.conftest import register_and_login_default_user, save_and_expect
+from tests.utils import register_and_login_default_user, save_and_expect
 
 
 @pytest.mark.anyio

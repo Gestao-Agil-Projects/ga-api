@@ -7,12 +7,8 @@ from starlette import status
 from ga_api.db.models.users import UserCreate
 from ga_api.enums.consultation_frequency import ConsultationFrequency
 from ga_api.enums.user_role import UserRole
-from tests.conftest import (
-    login_user_admin,
-    register_and_login_default_user,
-    register_user,
-)
 from tests.factories.user_factory import UserFactory
+from tests.utils import login_user_admin, register_and_login_default_user, register_user
 
 
 @pytest.mark.anyio
