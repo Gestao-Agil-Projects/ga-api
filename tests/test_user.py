@@ -1,20 +1,16 @@
-from datetime import date
-
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient, Response
-from sqlalchemy import DateTime
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from ga_api.db.dao.user_dao import UserDAO
-from ga_api.db.models.users import User, UserCreate
+from ga_api.db.models.users import UserCreate
 from ga_api.enums.consultation_frequency import ConsultationFrequency
 from ga_api.enums.user_role import UserRole
 from tests.conftest import (
+    login_user_admin,
     register_and_login_default_user,
     register_user,
-    save_and_expect,
 )
 from tests.factories.user_factory import UserFactory
 
@@ -190,3 +186,44 @@ async def test_authenticated_request_must_error_when_not_auth(
     )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.anyio
+async def test_login_user_admin(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+
+    response: Response = await client.post(
+        "/api/auth/jwt/login",
+        data={"username": "admin@admin.com", "password": "admin"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    body = response.json()
+    assert "access_token" in body
+    assert body.get("token_type") == "bearer"
+
+
+@pytest.mark.anyio
+async def test_authenticated_request_admin_user(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+
+    token: str = await login_user_admin(client)
+
+    response: Response = await client.get(
+        "/api/users/me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    body = response.json()
+    assert body["email"] == "admin@admin.com"
+    assert body["is_superuser"] == True
+    assert body["is_active"] == True
+    assert body["role"] == UserRole.ADMIN
+    assert "id" in body

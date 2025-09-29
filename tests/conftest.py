@@ -4,7 +4,7 @@ import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient, Response
 from pydantic.v1 import EmailStr
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -16,6 +16,7 @@ from ga_api.db.base import Base
 from ga_api.db.dao.abstract_dao import AbstractDAO
 from ga_api.db.dependencies import get_db_session
 from ga_api.db.models.users import UserCreate
+from ga_api.db.sql_scripts import SqlScripts
 from ga_api.db.utils import create_database, drop_database
 from ga_api.settings import settings
 from ga_api.web.application import get_app
@@ -49,6 +50,7 @@ async def _engine() -> AsyncGenerator[AsyncEngine, None]:
     engine = create_async_engine(str(settings.db_url))
     async with engine.begin() as conn:
         await conn.run_sync(meta.create_all)
+        await conn.execute(text(SqlScripts.create_root_admin()))
 
     try:
         yield engine
@@ -127,6 +129,14 @@ async def login_user(client: AsyncClient, email: str, password: str) -> str:
     response: Response = await client.post(
         "/api/auth/jwt/login",
         data={"username": email, "password": password},
+    )
+    return response.json()["access_token"]
+
+
+async def login_user_admin(client: AsyncClient) -> str:
+    response: Response = await client.post(
+        "/api/auth/jwt/login",
+        data={"username": "admin@admin.com", "password": "admin"},
     )
     return response.json()["access_token"]
 
