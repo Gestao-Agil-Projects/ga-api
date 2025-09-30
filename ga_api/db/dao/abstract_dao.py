@@ -3,7 +3,7 @@ from typing import Any, Generic, List, Optional, Type, TypeVar
 from uuid import UUID
 
 from fastapi import Depends, HTTPException
-from sqlalchemy import delete, exists, select
+from sqlalchemy import ClauseElement, delete, exists, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -112,21 +112,19 @@ class AbstractDAO(Generic[T], ABC):
 
         return obj
 
-    async def exists(self, **filters: Any) -> bool:
+    async def exists(self, *conditions: ClauseElement, **filters: Any) -> bool:
         """
-        Returns True if any record exists matching the provided filters.
-        Returns False if no match is found or if filters are empty.
+        Checks if at least one record exists that satisfies the filters.
+        - filters: dictionary for equality checks {field=value}
+        - conditions: additional SQLAlchemy expressions (comparisons, ranges, etc.)
         """
-        if not filters:
+        if not filters and not conditions:
             return False
 
-        stmt = select(
-            exists().where(
-                *(
-                    getattr(self.__model, field) == value
-                    for field, value in filters.items()
-                ),
-            ),
-        )
+        where_clauses = [
+            getattr(self.__model, field) == value for field, value in filters.items()
+        ]
+
+        stmt = select(exists().where(*where_clauses, *conditions))  # type: ignore
         result = await self._session.execute(stmt)
         return bool(result.scalar())
