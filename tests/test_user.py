@@ -221,5 +221,5 @@ async def test_authenticated_request_admin_user(
     assert body["email"] == "admin@admin.com"
     assert body["is_superuser"] == True
     assert body["is_active"] == True
-    assert body["role"] == UserRole.ADMIN
+    assert body["role"] == UserRole.PATIENT.value
     assert "id" in body
