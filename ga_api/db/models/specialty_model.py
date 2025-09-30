@@ -1,19 +1,21 @@
 import uuid
-from typing import List
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import String
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ga_api.db.base import Base
-from ga_api.db.models.professionals_model import Professional
+
+if TYPE_CHECKING:
+    from ga_api.db.models.professionals_model import Professional
 
 
 class Speciality(Base):
     __tablename__ = "specialities"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        PG_UUID(as_uuid=True),
+        UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
     )

@@ -1,28 +1,30 @@
 import uuid
 from datetime import datetime
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import TIMESTAMP, Boolean, Column, ForeignKey, String, Table, Text, func
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ga_api.db.base import Base
-from ga_api.db.models.availability_model import Availability
-from ga_api.db.models.block_model import Block
-from ga_api.db.models.specialty_model import Speciality
+
+if TYPE_CHECKING:
+    from ga_api.db.models.availability_model import Availability
+    from ga_api.db.models.block_model import Block
+    from ga_api.db.models.specialty_model import Speciality
 
 professionals_specialities = Table(
     "professionals_specialities",
     Base.metadata,
     Column(
         "professional_id",
-        PG_UUID(as_uuid=True),
+        UUID(as_uuid=True),
         ForeignKey("professionals.id"),
         primary_key=True,
     ),
     Column(
         "speciality_id",
-        PG_UUID(as_uuid=True),
+        UUID(as_uuid=True),
         ForeignKey("specialities.id"),
         primary_key=True,
     ),
@@ -33,10 +35,11 @@ class Professional(Base):
     __tablename__ = "professionals"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        PG_UUID(as_uuid=True),
+        UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
     )
+
     full_name: Mapped[str] = mapped_column(String(255))
     bio: Mapped[Optional[str]] = mapped_column(Text)
     phone: Mapped[Optional[str]] = mapped_column(String(50))
