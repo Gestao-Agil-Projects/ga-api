@@ -4,6 +4,7 @@ import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -79,8 +80,9 @@ async def dbsession(
     try:
         yield session
     finally:
+        if trans.is_active:
+            await trans.rollback()
         await session.close()
-        await trans.rollback()
         await connection.close()
 
 

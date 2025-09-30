@@ -128,6 +128,27 @@ async def test_register_user_without_cpf_returns_error(
 
 
 @pytest.mark.anyio
+async def test_register_user_with_registered_cpf_returns_error(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    await register_and_login_default_user(client)
+
+    other_user_request: UserCreate = UserFactory.create_default_user_request()
+    other_user_request.email = "foo@mail.com"  # type: ignore
+
+    response: Response = await client.post(
+        "/api/auth/register",
+        json=other_user_request.model_dump(mode="json"),
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    body = response.json()
+    assert body.get("detail") == "Cpf already exists."
+
+
+@pytest.mark.anyio
 async def test_login_user(
     fastapi_app: FastAPI,
     client: AsyncClient,
