@@ -10,7 +10,7 @@ from ga_api.db.base import Base
 
 if TYPE_CHECKING:
     from ga_api.db.models.availability_model import Availability
-    from ga_api.db.models.block_model import Block
+    from ga_api.db.models.block_model import BlockModel
     from ga_api.db.models.specialty_model import Speciality
 
 professionals_specialities = Table(
@@ -69,4 +69,7 @@ class Professional(Base):
         "Availability",
         back_populates="professional",
     )
-    blocks: Mapped[List["Block"]] = relationship("Block", back_populates="professional")
+    blocks: Mapped[List["BlockModel"]] = relationship(
+        "Block",
+        back_populates="professional",
+    )
