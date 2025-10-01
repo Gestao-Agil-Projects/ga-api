@@ -30,7 +30,7 @@ repos:
 
           - id: tests
             name: Validate tests
-            entry: docker-compose run --build --rm -T api pytest -vv .
+            entry: docker compose run --build --rm -T api pytest -vv .
             language: system
             pass_filenames: false
             always_run: true
