@@ -22,7 +22,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"email\": \"user3@example.com\",\n  \"password\": \"string\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false,\n  \"full_name\": \"string\",\n  \"cpf\": \"cpf\",\n  \"birth_date\": \"2025-09-23\",\n  \"phone\": \"string\",\n  \"frequency\": \"as_needed\",\n  \"role\": \"patient\"\n}",
+					"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"string\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false,\n  \"full_name\": \"string\",\n  \"cpf\": \"12345678901\",\n  \"birth_date\": \"2025-09-23\",\n  \"phone\": \"string\",\n  \"frequency\": \"as_needed\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -85,7 +85,8 @@
 							"pm.collectionVariables.set(\"auth_token\", response.access_token)"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -150,7 +151,75 @@
 				},
 				"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/auth/jwt/login' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/x-www-form-urlencoded' \\\n  -d 'grant_type=password&username=user%40mail.com&password=pass123&scope=&client_id=string&client_secret=********'"
 			},
-			"response": []
+			"response": [
+				{
+					"name": "login admin",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "admin@admin.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "string",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "********",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_url}}/api/auth/jwt/login",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"jwt",
+								"login"
+							]
+						}
+					},
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": null
+				}
+			]
 		},
 		{
 			"name": "get my user data",
@@ -202,6 +271,44 @@
 					]
 				},
 				"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/auth/jwt/logout' \\\n  -H 'accept: application/json' \\\n  -d ''"
+			},
+			"response": []
+		},
+		{
+			"name": "update user",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"password\": \"lorenzo\",\n  \"email\": \"lorenzo@example.com\",\n  \"is_active\": true,\n  \"is_superuser\": true,\n  \"is_verified\": true,\n  \"birth_date\": \"2025-09-29\",\n  \"phone\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"weekly\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api_url}}/api/users/d0f2610f-dcfb-42a6-97a4-3e97df4c6236",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"d0f2610f-dcfb-42a6-97a4-3e97df4c6236"
+					]
+				},
+				"description": "Generated from cURL: curl -X 'PATCH' \\\n  'http://localhost:8000/api/users/d0f2610f-dcfb-42a6-97a4-3e97df4c6236' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"password\": \"string\",\n  \"email\": \"user@example.com\",\n  \"is_active\": true,\n  \"is_superuser\": true,\n  \"is_verified\": true,\n  \"birth_date\": \"2025-09-29\",\n  \"phone\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"weekly\"\n}'"
 			},
 			"response": []
 		}

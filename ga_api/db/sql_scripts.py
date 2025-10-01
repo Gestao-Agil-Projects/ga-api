@@ -34,8 +34,8 @@ class SqlScripts:
             NULL,
             NULL,
             'WEEKLY',
-            'ADMIN',
+            'PATIENT',
             now(),
             now()
-        );
+        ) ON CONFLICT DO NOTHING;
         """
