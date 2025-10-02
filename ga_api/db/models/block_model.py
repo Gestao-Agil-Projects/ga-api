@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from ga_api.db.models.professionals_model import Professional
 
 
-class BlockModel(Base):
+class Block(Base):
     __tablename__ = "blocks"
 
     id: Mapped[uuid.UUID] = mapped_column(
