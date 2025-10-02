@@ -13,9 +13,10 @@ from ga_api.web.api.speciality.response.speciality_response import SpecialityRes
 admin_router = APIRouter()
 
 
-def get_speciality_service(speciality_dao: Annotated[SpecialityDAO, Depends()]) -> SpecialityService:
+def get_speciality_service(
+    speciality_dao: Annotated[SpecialityDAO, Depends()],
+) -> SpecialityService:
     return SpecialityService(speciality_dao)
-
 
 
 @admin_router.get("/", response_model=List[SpecialityResponse])
@@ -55,17 +56,6 @@ async def create_speciality(
 async def delete_speciality_model(
     user: Annotated[Any, Depends(current_active_user)],
     speciality_service: Annotated[SpecialityService, Depends(get_speciality_service)],
-    speciality_id: uuid.UUID
+    speciality_id: uuid.UUID,
 ) -> None:
     await speciality_service.delete_speciality(speciality_id)
-
-
-@admin_router.patch("/")
-async def update_speciality_model(
-    user: Annotated[Any, Depends(current_active_user)],
-    speciality_id: int,
-    request: SpecialityRequest,
-    speciality_service: Annotated[SpecialityService, Depends(get_speciality_service)],
-) -> SpecialityResponse:
-
-    return await speciality_service.update_speciality(speciality_id, request)  # type: ignore

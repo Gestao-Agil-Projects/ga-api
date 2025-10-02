@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import Depends
 from sqlalchemy import select
@@ -10,26 +10,18 @@ from ga_api.db.models.speciality_model import Speciality
 
 
 class SpecialityDAO(AbstractDAO[Speciality]):
-    """Class for accessing dummy table."""
+    """Class for accessing the specialities table."""
 
     def __init__(self, session: AsyncSession = Depends(get_db_session)) -> None:
         super().__init__(model=Speciality, session=session)
 
-    async def filter(self, name: Optional[str] = None) -> List[Speciality]:
+    async def get_by_title(self, title: str) -> Optional[Speciality]:
         """
-        Get specific dummy model.
+        Get a specific speciality model by its title.
 
-        :param name: name of dummy instance.
-        :return: dummy models.
+        :param title: The title of the speciality.
+        :return: A single Speciality model if found, otherwise None.
         """
-        query = select(Speciality)
-        if name:
-            query = query.where(Speciality.name == name)
-        rows = await self._session.execute(query)
-        return list(rows.scalars().fetchall())
-
-    async def find_by_name(self, speciality_name: str) -> Speciality | None:
-        result = await self._session.execute(
-            select(Speciality).where(Speciality.name == speciality_name),
-        )
-        return result.scalar_one_or_none()
+        query = select(Speciality).where(Speciality.title == title)
+        result = await self._session.execute(query)
+        return result.scalars().first()
