@@ -45,3 +45,7 @@ class TimeUtils:
                 detail=INVALID_TIME_INTERVAL_ERROR,
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
+
+    @staticmethod
+    def is_interval(start: datetime | None, end: datetime | None) -> bool:
+        return isinstance(start, datetime) and isinstance(end, datetime)
