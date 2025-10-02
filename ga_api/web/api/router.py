@@ -1,6 +1,6 @@
 from fastapi.routing import APIRouter
 
-from ga_api.web.api import availability, dummy, echo, mail, monitoring, users
+from ga_api.web.api import availability, dummy, echo, mail, monitoring, users, professionals
 
 api_router = APIRouter()
 
@@ -9,6 +9,11 @@ admin_router.include_router(
     availability.admin_router,
     prefix="/availability",
     tags=["admin", "availability"],
+)
+admin_router.include_router(
+    professionals.admin_router,
+    prefix="/professionals",
+    tags=["admin", "professionals"],
 )
 
 api_router.include_router(admin_router)
