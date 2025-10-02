@@ -31,4 +31,4 @@ async def delete_block_endpoint(
     block_id: UUID,
     block_service: Annotated[BlockService, Depends(get_block_service)],
 ) -> None:
-    await block_service.delete_block(block_id)
+    await block_service.delete_block(block_id, user)

@@ -21,5 +21,7 @@ class BlockService:
         AdminUtils.populate_admin_data(block, user)
         return await self.block_dao.save(block)
 
-    async def delete_block(self, block_id: UUID) -> None:
+    async def delete_block(self, block_id: UUID, user: User) -> None:
+        AdminUtils.validate_user_is_admin(user)
+
         await self.block_dao.delete_by_id(block_id)
