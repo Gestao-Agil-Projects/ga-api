@@ -2,7 +2,6 @@ from datetime import datetime
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ga_api.db.dao.abstract_dao import AbstractDAO
@@ -21,13 +20,11 @@ class AvailabilityDAO(AbstractDAO[Availability]):
         start_time: datetime,
         end_time: datetime,
     ) -> bool:
-        double_appointment = select(Availability).where(
-            and_(
-                Availability.patient_id == user_id,
-                Availability.status == AvailabilityStatus.TAKEN,
-                Availability.start_time < end_time,
-                Availability.end_time > start_time,
-            ),
-        )
-        result = await self._session.execute(select(double_appointment.exists()))
-        return result.scalar() is True
+        conditions = [
+            Availability.patient_id == user_id,
+            Availability.status == AvailabilityStatus.TAKEN,
+            Availability.start_time < end_time,
+            Availability.end_time > start_time,
+        ]
+
+        return await self.exists(*conditions)

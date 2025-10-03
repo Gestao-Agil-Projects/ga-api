@@ -7,6 +7,11 @@ from ga_api.db.dao.user_dao import UserDAO
 from ga_api.db.models.availability_model import Availability
 from ga_api.db.models.users import User
 from ga_api.enums.availability_status import AvailabilityStatus
+from ga_api.utils.admin_utils import AdminUtils
+from ga_api.web.api.schedule.request.admin_schedule_request import AdminScheduleRequest
+from ga_api.web.api.schedule.request.patient_schedule_request import (
+    PatientScheduleRequest,
+)
 
 
 class SchedulingService:
@@ -20,16 +25,20 @@ class SchedulingService:
 
     async def schedule_for_patient_by_admin(
         self,
-        availability_id: UUID,
-        patient_email: str,
+        request: AdminScheduleRequest,
         admin_user: User,
     ) -> Availability:
-        availability = await self._get_and_validate_availability(availability_id)
-        patient = await self.user_dao.find_by_email(patient_email)
+        AdminUtils.validate_user_is_admin(admin_user)
+
+        availability = await self._get_and_validate_availability(
+            request.availability_id,
+        )
+        patient = await self.user_dao.find_by_email(str(request.email))
+
         if not patient:
             raise HTTPException(
                 status_code=404,
-                detail="Paciente com o e-mail fornecido não encontrado.",
+                detail="Patient not found.",
             )
 
         if await self.availability_dao.check_double_appointment(
@@ -39,23 +48,25 @@ class SchedulingService:
         ):
             raise HTTPException(
                 status_code=409,
-                detail="O paciente já possui um agendamento conflitante neste horário.",
+                detail="Patient already has a schedule conflicting.",
             )
 
         update_data = {
             "patient_id": patient.id,
             "status": AvailabilityStatus.TAKEN,
-            "updated_by_admin_id": admin_user.id,
         }
+        AdminUtils.populate_admin_data(availability, admin_user, update_only=True)
+
         return await self.availability_dao.update(availability, update_data)
 
     async def schedule_patient(
         self,
-        *,
-        availability_id: UUID,
+        request: PatientScheduleRequest,
         patient_user: User,
     ) -> Availability:
-        availability = await self._get_and_validate_availability(availability_id)
+        availability = await self._get_and_validate_availability(
+            request.availability_id,
+        )
 
         if await self.availability_dao.check_double_appointment(
             patient_user.id,
@@ -64,13 +75,12 @@ class SchedulingService:
         ):
             raise HTTPException(
                 status_code=409,
-                detail="Você já possui um agendamento conflitante neste horário.",
+                detail="You already have a schedule conflicting with this new one.",
             )
 
         update_data = {
             "patient_id": patient_user.id,
             "status": AvailabilityStatus.TAKEN,
-            "updated_by_admin_id": None,
         }
         return await self.availability_dao.update(availability, update_data)
 
@@ -82,11 +92,11 @@ class SchedulingService:
         if not availability:
             raise HTTPException(
                 status_code=404,
-                detail="Disponibilidade não encontrada.",
+                detail="Availability not found.",
             )
         if availability.status != AvailabilityStatus.AVAILABLE:
             raise HTTPException(
                 status_code=400,
-                detail="Este horário não está disponível.",
+                detail="This availability is not available.",
             )
         return availability

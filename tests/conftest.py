@@ -134,9 +134,7 @@ async def patient_user(client: AsyncClient, dbsession: AsyncSession) -> User:
 
 
 @pytest.fixture
-async def authenticated_patient_client(
-    client: AsyncClient, patient_user: User
-) -> AsyncClient:
+async def cleint(client: AsyncClient, patient_user: User) -> AsyncClient:
     """
     Autentica o usuário paciente e retorna um client com o token de autorização.
     """
