@@ -1,6 +1,8 @@
 from fastapi.routing import APIRouter
 
 from ga_api.web.api import availability, block, dummy, echo, mail, monitoring, users
+from ga_api.web.api.admin import admin_views
+from ga_api.web.api.scheduling import scheduling_views
 
 api_router = APIRouter()
 
@@ -13,6 +15,14 @@ admin_router.include_router(
     prefix="/availability",
     tags=["admin", "availability"],
 )
+
+api_router.include_router(
+    scheduling_views.scheduling_router,
+    prefix="/scheduling",
+    tags=["Scheduling"],
+)
+
+admin_router.include_router(admin_views.admin_router)
 
 api_router.include_router(admin_router)
 api_router.include_router(monitoring.router)
