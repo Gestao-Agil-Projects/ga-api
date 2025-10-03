@@ -1,6 +1,14 @@
 from fastapi.routing import APIRouter
 
-from ga_api.web.api import availability, dummy, echo, mail, monitoring, users, professionals
+from ga_api.web.api import (
+    availability,
+    dummy,
+    echo,
+    mail,
+    monitoring,
+    professionals,
+    users,
+)
 
 api_router = APIRouter()
 

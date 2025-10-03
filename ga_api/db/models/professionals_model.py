@@ -11,7 +11,7 @@ from ga_api.db.base import Base
 if TYPE_CHECKING:
     from ga_api.db.models.availability_model import Availability
     from ga_api.db.models.block_model import Block
-    from ga_api.db.models.specialty_model import Speciality
+    from ga_api.db.models.speciality_model import Speciality
 
 professionals_specialities = Table(
     "professionals_specialities",
