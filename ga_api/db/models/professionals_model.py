@@ -70,4 +70,7 @@ class Professional(Base):
         "Availability",
         back_populates="professional",
     )
-    blocks: Mapped[List["Block"]] = relationship("Block", back_populates="professional")
+    blocks: Mapped[List["Block"]] = relationship(
+        "Block",
+        back_populates="professional",
+    )

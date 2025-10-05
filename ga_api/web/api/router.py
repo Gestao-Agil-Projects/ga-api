@@ -2,17 +2,22 @@ from fastapi.routing import APIRouter
 
 from ga_api.web.api import (
     availability,
+    block,
     dummy,
     echo,
     mail,
     monitoring,
     professionals,
+    schedule,
     users,
 )
 
 api_router = APIRouter()
 
 admin_router = APIRouter(prefix="/admin")
+
+admin_router.include_router(block.router, prefix="/blocks", tags=["admin", "blocks"])
+
 admin_router.include_router(
     availability.admin_router,
     prefix="/availability",
@@ -22,6 +27,12 @@ admin_router.include_router(
     professionals.admin_router,
     prefix="/professionals",
     tags=["admin", "professionals"],
+)
+
+admin_router.include_router(
+    schedule.admin_router,
+    prefix="/schedule",
+    tags=["admin", "schedule"],
 )
 
 api_router.include_router(admin_router)
@@ -35,3 +46,4 @@ api_router.include_router(
     prefix="/professionals",
     tags=["professionals"],
 )
+api_router.include_router(schedule.router, prefix="/schedule", tags=["schedule"])

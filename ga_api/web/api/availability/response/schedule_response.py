@@ -2,19 +2,18 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 from ga_api.enums.availability_status import AvailabilityStatus
 
 
-class AvailabilityResponse(BaseModel):
-
+class SchedulingResponse(BaseModel):
     id: UUID
-    status: AvailabilityStatus
     start_time: datetime
     end_time: datetime
-    created_at: datetime
+    status: AvailabilityStatus
     professional_id: UUID
     patient_id: Optional[UUID] = None
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True

@@ -17,11 +17,11 @@ class AdminUtils:
             )
 
     @staticmethod
-    def populate_admin_data(obj: Any, admin: User) -> None:
+    def populate_admin_data(obj: Any, admin: User, update_only: bool = False) -> None:
         if not admin.is_superuser:
             raise Exception("This action can only be performed by superusers")
 
-        if hasattr(obj, "created_by_admin_id"):
+        if not update_only and hasattr(obj, "created_by_admin_id"):
             obj.created_by_admin_id = admin.id
 
         if hasattr(obj, "updated_by_admin_id"):
