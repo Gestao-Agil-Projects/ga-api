@@ -1,13 +1,13 @@
 import uuid
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class ProfessionalCreateRequest(BaseModel):
     full_name: str
     bio: Optional[str] = None
-    phone: Optional[str] = None
-    email: str
+    phone: str
+    email: EmailStr
     is_enabled: bool = True
-    specialities: List[uuid.UUID | None] = []
+    specialities: Optional[List[uuid.UUID]] = []

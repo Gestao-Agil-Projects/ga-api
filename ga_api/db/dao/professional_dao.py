@@ -1,7 +1,6 @@
 # ga_api/db/dao/professional_dao.py
 
-import uuid
-from typing import List, Optional
+from typing import List
 
 from fastapi import Depends
 from sqlalchemy import select
@@ -17,22 +16,24 @@ class ProfessionalDAO(AbstractDAO[Professional]):
     def __init__(self, session: AsyncSession = Depends(get_db_session)) -> None:
         super().__init__(Professional, session)
 
-    async def get_all_with_specialities(self) -> List[Professional]:
-        query = select(Professional).options(selectinload(Professional.specialities))
-        result = await self._session.execute(query)
-        return list(result.scalars().all())
-
-    async def find_by_id_with_specialities(
+    async def find_all_with_specialities(
         self,
-        professional_id: uuid.UUID,
-    ) -> Optional[Professional]:
+        limit: int = 50,
+        offset: int = 0,
+        only_enabled: bool = False,
+    ) -> List[Professional]:
         """
-        Encontra um profissional pelo ID com as suas especialidades pré-carregadas.
+        Find all professionals by id with their specialities loaded.
         """
         query = (
             select(Professional)
-            .where(Professional.id == professional_id)
             .options(selectinload(Professional.specialities))
+            .limit(limit)
+            .offset(offset)
         )
+
+        if only_enabled:
+            query.where(Professional.is_enabled)
+
         result = await self._session.execute(query)
-        return result.scalars().one_or_none()
+        return list(result.scalars().all())

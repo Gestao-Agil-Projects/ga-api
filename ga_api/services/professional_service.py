@@ -29,30 +29,34 @@ class ProfessionalService:
 
     async def create_professional(
         self,
-        professional_create_request: ProfessionalCreateRequest,
+        request: ProfessionalCreateRequest,
         admin_user: User,
     ) -> Professional:
         AdminUtils.validate_user_is_admin(admin_user)
 
-        professional_data = professional_create_request.model_dump()
-        speciality_ids = professional_data.pop("specialities", [])
+        new_professional: Professional = Professional(
+            full_name=request.full_name,
+            bio=request.bio,
+            phone=request.phone,
+            email=request.email,
+            is_enabled=request.is_enabled,
+            specialities=[],
+        )
 
-        new_professional = Professional(**professional_data)
+        if request.specialities:
+            all_ids_exist = await self.speciality_dao.all_ids_exist_in(
+                request.specialities,
+            )
 
-        if speciality_ids:
-            specialities = []
-            for speciality_id in speciality_ids:
-                if speciality_id:
-                    speciality = await self.speciality_dao.find_by_id(speciality_id)
-                    if speciality:
-                        specialities.append(speciality)
-                    else:
-                        raise HTTPException(
-                            status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Especialidade com id "
-                            f"{speciality_id} não encontrada.",
-                        )
-            new_professional.specialities = specialities
+            if not all_ids_exist:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="One or more specialities specified does not exist.",
+                )
+
+            new_professional.specialities = await self.speciality_dao.find_all_by_ids(
+                request.specialities,
+            )
 
         AdminUtils.populate_admin_data(new_professional, admin_user)
         return await self.professional_dao.save(new_professional)
@@ -60,7 +64,7 @@ class ProfessionalService:
     async def update_professional(
         self,
         professional_id: uuid.UUID,
-        professional_update_request: ProfessionalUpdateRequest,
+        request: ProfessionalUpdateRequest,
         admin_user: User,
     ) -> Professional:
         AdminUtils.validate_user_is_admin(admin_user)
@@ -70,22 +74,57 @@ class ProfessionalService:
         if not professional:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Profissional nao encontrado.",
+                detail="Professional not found.",
             )
-        if professional_update_request.full_name is not None:
-            professional.full_name = professional_update_request.full_name
+        if request.full_name is not None:
+            professional.full_name = request.full_name
 
-        if professional_update_request.bio is not None:
-            professional.bio = professional_update_request.bio
+        if request.bio is not None:
+            professional.bio = request.bio
+
+        if request.is_enabled is not None:
+            professional.is_enabled = request.is_enabled
+
+        if request.specialities is not None:
+            if len(request.specialities) == 0:
+                professional.specialities = []
+
+            else:
+                all_ids_exist = await self.speciality_dao.all_ids_exist_in(
+                    request.specialities,
+                )
+                if not all_ids_exist:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="One or more specialities specified does not exist.",
+                    )
+                professional.specialities = await self.speciality_dao.find_all_by_ids(
+                    request.specialities,
+                )
 
         professional.updated_at = datetime.now()
         professional.updated_by_admin_id = admin_user.id
+        return await self.professional_dao.save(professional)
 
-        return professional
+    async def get_all_professionals_admin(
+        self,
+        admin_user: User,
+        limit: int,
+        offset: int,
+    ) -> List[Professional]:
+        AdminUtils.validate_user_is_admin(admin_user)
+        return await self.professional_dao.find_all_with_specialities(limit, offset)
 
     async def get_all_professionals(
         self,
-        admin_user: User,
+        limit: int,
+        offset: int,
     ) -> List[Professional]:
-        AdminUtils.validate_user_is_admin(admin_user)
-        return await self.professional_dao.get_all_with_specialities()
+        """
+        Retorna apenas profissionais habilitados para usuários não-admin.
+        """
+        return await self.professional_dao.find_all_with_specialities(
+            limit,
+            offset,
+            only_enabled=True,
+        )
