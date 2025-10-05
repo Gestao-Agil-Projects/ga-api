@@ -15,7 +15,7 @@ class SpecialityDAO(AbstractDAO[Speciality]):
     def __init__(self, session: AsyncSession = Depends(get_db_session)) -> None:
         super().__init__(model=Speciality, session=session)
 
-    async def get_by_title(self, title: str) -> Optional[Speciality]:
+    async def find_by_title(self, title: str) -> Optional[Speciality]:
         """
         Get a specific speciality model by its title.
 

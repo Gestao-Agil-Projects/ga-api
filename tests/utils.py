@@ -1,9 +1,12 @@
 from typing import Any, List
 
 from httpx import AsyncClient, Response
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ga_api.db.base import Base
 from ga_api.db.dao.abstract_dao import AbstractDAO
+from ga_api.db.models.availability_model import Availability
+from ga_api.db.models.professionals_model import Professional
 from ga_api.db.models.users import UserCreate
 from tests.factories.user_factory import UserFactory
 
@@ -52,3 +55,10 @@ async def save_and_expect(
 
     assert len(result) == expected_quantity
     assert all(isinstance(item, expected_type) for item in result)
+
+
+async def inject_default_professional(dbsession: AsyncSession) -> Professional:
+    professional = Professional(full_name="John", email="john@mail.com")
+    dbsession.add(professional)
+    await dbsession.flush()
+    return professional

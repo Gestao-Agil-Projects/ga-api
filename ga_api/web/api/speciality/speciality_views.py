@@ -23,7 +23,7 @@ def get_speciality_service(
 async def get_speciality_models(
     user: Annotated[Any, Depends(current_active_user)],
     speciality_service: Annotated[SpecialityService, Depends(get_speciality_service)],
-    speciality_id: int | None = None,
+    speciality_id: uuid.UUID | None = None,
     limit: int = 10,
     offset: int = 0,
 ) -> List[SpecialityResponse]:
@@ -31,31 +31,32 @@ async def get_speciality_models(
     return await speciality_service.get_speciality_models(limit, offset, speciality_id)  # type: ignore
 
 
-@admin_router.put("/", status_code=204)
+@admin_router.put("/", status_code=200)
 async def update_speciality_model(
     user: Annotated[Any, Depends(current_active_user)],
     speciality_id: uuid.UUID,
     request: SpecialityRequest,
     speciality_service: Annotated[SpecialityService, Depends(get_speciality_service)],
-) -> None:
+) -> SpecialityResponse:
 
-    await speciality_service.update_speciality(user, speciality_id, request)
+    return await speciality_service.update_speciality(user, speciality_id, request)  # type: ignore
 
 
-@admin_router.post("/", status_code=204)
+@admin_router.post("/", status_code=201)
 async def create_speciality(
     user: Annotated[Any, Depends(current_active_user)],
     request: SpecialityRequest,
     speciality_service: Annotated[SpecialityService, Depends(get_speciality_service)],
-) -> None:
+) -> SpecialityResponse:
 
-    await speciality_service.create_speciality(user, request)
+    return await speciality_service.create_speciality(user, request)  # type: ignore
 
 
-@admin_router.delete("/", status_code=204)
+# @admin_router.delete("/", status_code=204)
 async def delete_speciality_model(
     user: Annotated[Any, Depends(current_active_user)],
     speciality_service: Annotated[SpecialityService, Depends(get_speciality_service)],
     speciality_id: uuid.UUID,
 ) -> None:
+
     await speciality_service.delete_speciality(speciality_id)

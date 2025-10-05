@@ -14,22 +14,17 @@ class SpecialityService:
     def __init__(self, speciality_dao: SpecialityDAO) -> None:
         self.speciality_dao = speciality_dao
 
-    async def create_speciality(self, user: User, request: SpecialityRequest) -> None:
+    async def create_speciality(
+        self,
+        user: User,
+        request: SpecialityRequest,
+    ) -> Speciality:
         AdminUtils.validate_user_is_admin(user)
-
-        # MODIFICATION: Convert title to lowercase
         request.title = request.title.lower()
-
-        # MODIFICATION: Check for uniqueness before creating
-        existing_speciality = await self.speciality_dao.get_by_title(request.title)
-        if existing_speciality:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Speciality with this title already exists.",
-            )
+        await self._validate_title(request.title)
 
         speciality = Speciality(**request.model_dump(exclude_unset=True))
-        await self.speciality_dao.save(speciality)
+        return await self.speciality_dao.save(speciality)
 
     async def get_speciality_models(
         self,
@@ -66,19 +61,17 @@ class SpecialityService:
                 status_code=status.HTTP_404_NOT_FOUND,
             )
 
-        update_data = request.model_dump(exclude_unset=True)
+        await self._validate_title(request.title.lower())
 
-        # MODIFICATION: If title is being updated, validate it
-        if "title" in update_data:
-            new_title = update_data["title"].lower()
-            update_data["title"] = new_title
+        speciality.title = request.title.lower()
+        AdminUtils.populate_admin_data(speciality, user, update_only=True)
 
-            # Check if another speciality already has the new title
-            existing = await self.speciality_dao.get_by_title(new_title)
-            if existing and existing.id != speciality_id:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="Speciality with this title already exists.",
-                )
+        return await self.speciality_dao.save(speciality)
 
-        return await self.speciality_dao.update(speciality, update_data)
+    async def _validate_title(self, title: str) -> None:
+        speciality = await self.speciality_dao.find_by_title(title)
+        if speciality:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Speciality with this title already exists.",
+            )
