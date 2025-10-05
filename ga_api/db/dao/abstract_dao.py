@@ -3,11 +3,12 @@ from typing import Any, Generic, List, Optional, Type, TypeVar
 from uuid import UUID
 
 from fastapi import Depends, HTTPException
-from sqlalchemy import delete, exists, select
+from sqlalchemy import ClauseElement, delete, exists, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ga_api.db.dependencies import get_db_session
+from ga_api.db.utils import create_generic_integrity_error_message
 
 T = TypeVar("T")
 
@@ -36,7 +37,8 @@ class AbstractDAO(Generic[T], ABC):
             await self._session.flush()
         except IntegrityError as e:
             await self._session.rollback()
-            raise HTTPException(status_code=400, detail="Object already exists") from e
+            detail = create_generic_integrity_error_message(e)
+            raise HTTPException(status_code=400, detail=detail) from e
 
         return obj
 
@@ -71,6 +73,15 @@ class AbstractDAO(Generic[T], ABC):
         """
         result = await self._session.execute(
             select(self.__model).offset(offset).limit(limit),
+        )
+        return result.scalars().all()  # type: ignore
+
+    async def find_all_by_ids(self, ids: List[UUID]) -> List[T]:
+        if not ids:
+            return []
+
+        result = await self._session.execute(
+            select(self.__model).where(self.__model.id.in_(ids)),  # type: ignore
         )
         return result.scalars().all()  # type: ignore
 
@@ -112,21 +123,29 @@ class AbstractDAO(Generic[T], ABC):
 
         return obj
 
-    async def exists(self, **filters: Any) -> bool:
+    async def exists(self, *conditions: ClauseElement, **filters: Any) -> bool:
         """
-        Returns True if any record exists matching the provided filters.
-        Returns False if no match is found or if filters are empty.
+        Checks if at least one record exists that satisfies the filters.
+        - filters: dictionary for equality checks {field=value}
+        - conditions: additional SQLAlchemy expressions (comparisons, ranges, etc.)
         """
-        if not filters:
+        if not filters and not conditions:
             return False
 
-        stmt = select(
-            exists().where(
-                *(
-                    getattr(self.__model, field) == value
-                    for field, value in filters.items()
-                ),
-            ),
-        )
+        where_clauses = [
+            getattr(self.__model, field) == value for field, value in filters.items()
+        ]
+
+        stmt = select(exists().where(*where_clauses, *conditions))  # type: ignore
         result = await self._session.execute(stmt)
         return bool(result.scalar())
+
+    async def all_ids_exist_in(self, ids: List[UUID]) -> bool:
+        if not ids:
+            return False
+
+        stmt = select(func.count()).where(self.__model.id.in_(ids))  # type: ignore
+        result = await self._session.execute(stmt)
+        count = result.scalar_one()
+
+        return count == len(ids)

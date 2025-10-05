@@ -11,7 +11,7 @@ class InterceptHandler(logging.Handler):
     """
     Default handler from examples in loguru documentation.
 
-    This handler intercepts all log requests and
+    This handler intercepts all log request and
     passes them to loguru.
 
     For more info see:

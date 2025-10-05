@@ -1,11 +1,18 @@
 from contextlib import asynccontextmanager
+from logging import warning
 from typing import AsyncGenerator
 
 from fastapi import FastAPI
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import (
+    AsyncConnection,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from ga_api.db.meta import meta
 from ga_api.db.models import load_all_models
+from ga_api.db.sql_scripts import SqlScripts
 from ga_api.settings import settings
 
 
@@ -34,7 +41,13 @@ async def _create_tables() -> None:  # pragma: no cover
     engine = create_async_engine(str(settings.db_url))
     async with engine.begin() as connection:
         await connection.run_sync(meta.create_all)
+        await _create_root_admin(connection)
     await engine.dispose()
+
+
+async def _create_root_admin(connection: AsyncConnection) -> None:
+    warning("CREATING ROOT ADMIN. !!! MUST BE USED FOR DEVELOPMENT ONLY !!!")
+    await connection.execute(text(SqlScripts.create_root_admin()))
 
 
 @asynccontextmanager

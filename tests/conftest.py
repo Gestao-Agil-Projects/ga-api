@@ -3,7 +3,7 @@ from typing import Any, AsyncGenerator
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
-from sqlalchemy import text
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -12,10 +12,12 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from ga_api.db.dependencies import get_db_session
+from ga_api.db.models.users import User
 from ga_api.db.sql_scripts import SqlScripts
 from ga_api.db.utils import create_database, drop_database
 from ga_api.settings import settings
 from ga_api.web.application import get_app
+from tests.factories.user_factory import UserFactory
 
 
 @pytest.fixture(scope="session")
@@ -79,8 +81,9 @@ async def dbsession(
     try:
         yield session
     finally:
+        if trans.is_active:
+            await trans.rollback()
         await session.close()
-        await trans.rollback()
         await connection.close()
 
 
@@ -111,3 +114,35 @@ async def client(
     """
     async with AsyncClient(app=fastapi_app, base_url="http://test", timeout=2.0) as ac:
         yield ac
+
+
+@pytest.fixture
+async def patient_user(client: AsyncClient, dbsession: AsyncSession) -> User:
+    """
+    Cria um usuário do tipo "paciente" através da API de registro.
+    """
+    user_request = UserFactory.create_default_user_request()
+
+    await client.post("/api/auth/register", json=user_request.model_dump(mode="json"))
+
+    user = (
+        await dbsession.execute(select(User).where(User.email == user_request.email))
+    ).scalar_one()
+    return user
+
+
+@pytest.fixture
+async def cleint(client: AsyncClient, patient_user: User) -> AsyncClient:
+    """
+    Autentica o usuário paciente e retorna um client com o token de autorização.
+    """
+    login_data = {
+        "username": patient_user.email,
+        "password": "password123",  # A senha da sua UserFactory
+    }
+
+    response = await client.post("/api/auth/jwt/login", data=login_data)
+    token_data = response.json()
+
+    client.headers["Authorization"] = f"Bearer {token_data['access_token']}"
+    return client
