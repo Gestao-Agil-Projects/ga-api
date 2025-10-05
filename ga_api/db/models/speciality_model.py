@@ -19,7 +19,7 @@ class Speciality(Base):
         primary_key=True,
         default=uuid.uuid4,
     )
-    title: Mapped[str] = mapped_column(String(255), unique=True)
+    title: Mapped[str] = mapped_column(String(255), unique=True, index=True)
 
     professionals: Mapped[List["Professional"]] = relationship(
         "Professional",

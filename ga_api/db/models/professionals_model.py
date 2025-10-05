@@ -11,7 +11,7 @@ from ga_api.db.base import Base
 if TYPE_CHECKING:
     from ga_api.db.models.availability_model import Availability
     from ga_api.db.models.block_model import Block
-    from ga_api.db.models.specialty_model import Speciality
+    from ga_api.db.models.speciality_model import Speciality
 
 professionals_specialities = Table(
     "professionals_specialities",
@@ -42,9 +42,9 @@ class Professional(Base):
 
     full_name: Mapped[str] = mapped_column(String(255))
     bio: Mapped[Optional[str]] = mapped_column(Text)
-    phone: Mapped[Optional[str]] = mapped_column(String(50))
+    phone: Mapped[Optional[str]] = mapped_column(String(50), unique=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
-    is_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_enabled: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=func.now(),
@@ -64,6 +64,7 @@ class Professional(Base):
         "Speciality",
         secondary=professionals_specialities,
         back_populates="professionals",
+        lazy="selectin",
     )
     availabilities: Mapped[List["Availability"]] = relationship(
         "Availability",

@@ -7,6 +7,7 @@ from ga_api.web.api import (
     echo,
     mail,
     monitoring,
+    professionals,
     schedule,
     users,
 )
@@ -22,6 +23,11 @@ admin_router.include_router(
     prefix="/availability",
     tags=["admin", "availability"],
 )
+admin_router.include_router(
+    professionals.admin_router,
+    prefix="/professionals",
+    tags=["admin", "professionals"],
+)
 
 admin_router.include_router(
     schedule.admin_router,
@@ -35,4 +41,9 @@ api_router.include_router(users.router)
 api_router.include_router(echo.router, prefix="/echo", tags=["echo"])
 api_router.include_router(dummy.router, prefix="/dummy", tags=["dummy"])
 api_router.include_router(mail.router, prefix="/mail", tags=["mail"])
+api_router.include_router(
+    professionals.router,
+    prefix="/professionals",
+    tags=["professionals"],
+)
 api_router.include_router(schedule.router, prefix="/schedule", tags=["schedule"])
