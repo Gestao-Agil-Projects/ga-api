@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ga_api.db.base import Base
 from ga_api.db.dao.abstract_dao import AbstractDAO
-from ga_api.db.models.availability_model import Availability
 from ga_api.db.models.professionals_model import Professional
 from ga_api.db.models.users import UserCreate
 from tests.factories.user_factory import UserFactory

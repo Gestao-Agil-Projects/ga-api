@@ -1,9 +1,9 @@
 import uuid
+from datetime import datetime, timedelta, timezone
 
 import pytest
-from datetime import datetime, timedelta, timezone
-from httpx import AsyncClient, Response
 from fastapi import FastAPI
+from httpx import AsyncClient, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
@@ -13,9 +13,9 @@ from ga_api.enums.availability_status import AvailabilityStatus
 from ga_api.web.api.availability.request.availability_request import AvailabilityRequest
 from tests.factories.availability_factory import AvailabilityFactory
 from tests.utils import (
+    inject_default_professional,
     login_user_admin,
     register_and_login_default_user,
-    inject_default_professional,
     save_and_expect,
 )
 

@@ -10,8 +10,8 @@ from ga_api.db.dao.speciality_dao import SpecialityDAO
 from ga_api.db.models.speciality_model import Speciality
 from ga_api.web.api.speciality.request.speciality_request import SpecialityRequest
 from tests.utils import (
-    register_and_login_default_user,
     login_user_admin,
+    register_and_login_default_user,
     save_and_expect,
 )
 

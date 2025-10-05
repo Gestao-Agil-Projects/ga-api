@@ -1,7 +1,8 @@
 import uuid
+
 import pytest
-from httpx import AsyncClient, Response
 from fastapi import FastAPI
+from httpx import AsyncClient, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 

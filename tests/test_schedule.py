@@ -5,18 +5,17 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.factories.availability_factory import AvailabilityFactory
-from tests.factories.user_factory import UserFactory
 from ga_api.db.dao.availability_dao import AvailabilityDAO
 from ga_api.db.dao.user_dao import UserDAO
 from ga_api.db.models.professionals_model import Professional
+from ga_api.db.models.users import User
 from ga_api.enums.availability_status import AvailabilityStatus
 from ga_api.web.api.schedule.request.admin_schedule_request import AdminScheduleRequest
 from ga_api.web.api.schedule.request.patient_schedule_request import (
     PatientScheduleRequest,
 )
-
-from ga_api.db.models.users import User
+from tests.factories.availability_factory import AvailabilityFactory
+from tests.factories.user_factory import UserFactory
 from tests.utils import (
     inject_default_professional,
     login_user_admin,

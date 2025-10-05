@@ -13,9 +13,9 @@ from ga_api.db.models.block_model import Block
 from ga_api.db.models.professionals_model import Professional
 from ga_api.web.api.block.request.block_request import BlockCreateRequest
 from tests.utils import (
+    inject_default_professional,
     login_user_admin,
     register_and_login_default_user,
-    inject_default_professional,
 )
 
 

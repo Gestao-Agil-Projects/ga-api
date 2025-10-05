@@ -1,13 +1,9 @@
 from typing import Any, AsyncGenerator
 
-from ga_api.db.models.users import User
-from tests.factories.user_factory import UserFactory
-
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
-from sqlalchemy import text, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -16,10 +12,12 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from ga_api.db.dependencies import get_db_session
+from ga_api.db.models.users import User
 from ga_api.db.sql_scripts import SqlScripts
 from ga_api.db.utils import create_database, drop_database
 from ga_api.settings import settings
 from ga_api.web.application import get_app
+from tests.factories.user_factory import UserFactory
 
 
 @pytest.fixture(scope="session")
