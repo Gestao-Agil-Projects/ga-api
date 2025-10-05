@@ -9,6 +9,7 @@ from ga_api.web.api import (
     monitoring,
     professionals,
     schedule,
+    speciality,
     users,
 )
 
@@ -33,6 +34,12 @@ admin_router.include_router(
     schedule.admin_router,
     prefix="/schedule",
     tags=["admin", "schedule"],
+)
+
+admin_router.include_router(
+    speciality.admin_router,
+    prefix="/speciality",
+    tags=["admin", "speciality"],
 )
 
 api_router.include_router(admin_router)
