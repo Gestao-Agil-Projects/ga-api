@@ -31,7 +31,10 @@ class SpecialityService:
         limit: int,
         offset: int,
         speciality_id: UUID | None,
+        user: User,
     ) -> List[Speciality]:
+        AdminUtils.validate_user_is_admin(user)
+
         if not speciality_id:
             return await self.speciality_dao.find_all(limit, offset)
 

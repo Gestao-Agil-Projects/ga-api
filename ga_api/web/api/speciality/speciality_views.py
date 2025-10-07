@@ -27,8 +27,12 @@ async def get_speciality_models(
     limit: int = 10,
     offset: int = 0,
 ) -> List[SpecialityResponse]:
-
-    return await speciality_service.get_speciality_models(limit, offset, speciality_id)  # type: ignore
+    return await speciality_service.get_speciality_models(  # type: ignore
+        limit,
+        offset,
+        speciality_id,
+        user,
+    )
 
 
 @admin_router.put("/", status_code=200)
