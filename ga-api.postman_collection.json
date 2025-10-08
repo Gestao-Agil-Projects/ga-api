@@ -93,6 +93,9 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -494,19 +497,17 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
+								"key": "accept",
+								"value": "application/json"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"professional_id\": \"string\",\n  \"specialty_id\": \"string\",\n  \"date\": \"2025-11-20T14:30:00\"\n}",
+							"raw": "{\n  \"availability_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -514,15 +515,17 @@
 							}
 						},
 						"url": {
-							"raw": "{{api_url}}/schedule/",
+							"raw": "{{api_url}}/api/schedule/",
 							"host": [
 								"{{api_url}}"
 							],
 							"path": [
+								"api",
 								"schedule",
 								""
 							]
-						}
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/schedule/' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"availability_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}'"
 					},
 					"response": []
 				},
@@ -530,10 +533,19 @@
 					"name": "admin schedule for patient",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"patient_id\": \"string\",\n  \"professional_id\": \"string\",\n  \"specialty_id\": \"string\",\n  \"date\": \"2025-11-22T10:00:00\"\n}",
+							"raw": "{\n  \"availability_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"email\": \"user@example.com\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -541,16 +553,18 @@
 							}
 						},
 						"url": {
-							"raw": "{{api_url}}/admin/schedule/",
+							"raw": "{{api_url}}/api/admin/schedule/",
 							"host": [
 								"{{api_url}}"
 							],
 							"path": [
+								"api",
 								"admin",
 								"schedule",
 								""
 							]
-						}
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/admin/schedule/' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"availability_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"email\": \"user@example.com\"\n}'"
 					},
 					"response": []
 				}
@@ -561,13 +575,22 @@
 			"name": "availability",
 			"item": [
 				{
-					"name": "availability",
+					"name": "create availability",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"professional_id\": \"string\",\n  \"weekday\": \"MONDAY\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"18:00\",\n  \"is_active\": true\n}",
+							"raw": "{\n  \"start_time\": \"2025-10-07T23:30:13.609Z\",\n  \"end_time\": \"2025-10-07T23:30:13.609Z\",\n  \"professional_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -575,16 +598,18 @@
 							}
 						},
 						"url": {
-							"raw": "{{api_url}}/admin/availability/",
+							"raw": "{{api_url}}/api/admin/availability/",
 							"host": [
 								"{{api_url}}"
 							],
 							"path": [
+								"api",
 								"admin",
 								"availability",
 								""
 							]
-						}
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/admin/availability/' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"start_time\": \"2025-10-07T23:30:13.609Z\",\n  \"end_time\": \"2025-10-07T23:30:13.609Z\",\n  \"professional_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}'"
 					},
 					"response": []
 				},
@@ -594,14 +619,17 @@
 						"method": "PUT",
 						"header": [
 							{
-								"key": "Authorization",
-								"value": "",
-								"type": "text"
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"start_time\": \"08:30\",\n  \"end_time\": \"17:30\",\n  \"is_active\": false\n}",
+							"raw": "{\n  \"start_time\": \"2025-10-07T23:31:13.393Z\",\n  \"end_time\": \"2025-10-07T23:31:13.393Z\",\n  \"status\": \"available\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -609,16 +637,18 @@
 							}
 						},
 						"url": {
-							"raw": "{{api_url}}/admin/availability/{{id_availability}}",
+							"raw": "{{api_url}}/api/admin/availability/f09a1a77-6dcf-4c05-9e9f-6a7e03a7d29a",
 							"host": [
 								"{{api_url}}"
 							],
 							"path": [
+								"api",
 								"admin",
 								"availability",
-								"{{id_availability}}"
+								"f09a1a77-6dcf-4c05-9e9f-6a7e03a7d29a"
 							]
-						}
+						},
+						"description": "Generated from cURL: curl -X 'PUT' \\\n  'http://localhost:8000/api/admin/availability/f09a1a77-6dcf-4c05-9e9f-6a7e03a7d29a' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"start_time\": \"2025-10-07T23:31:13.393Z\",\n  \"end_time\": \"2025-10-07T23:31:13.393Z\",\n  \"status\": \"available\"\n}'"
 					},
 					"response": []
 				}
@@ -631,16 +661,6 @@
 				{
 					"name": "create professional",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwYTE3NDMwOS00Y2NjLTRhZGUtOWNlNy1lOGEyODVmYmZkYWUiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl19.ZwZwv_S81z20f2Xr2XYiUere9MnlX_YAdk5MCq6WLLQ",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [
 							{
@@ -659,11 +679,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{api_url}}/admin/professionals/",
+							"raw": "{{api_url}}/api/admin/professionals/",
 							"host": [
 								"{{api_url}}"
 							],
 							"path": [
+								"api",
 								"admin",
 								"professionals",
 								""
