@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 
 from ga_api.db.dao.block_dao import BlockDAO
+from ga_api.db.dao.professional_dao import ProfessionalDAO
 from ga_api.db.models.users import current_active_user
 from ga_api.services.block_service import BlockService
 from ga_api.web.api.block.request.block_request import BlockCreateRequest
@@ -12,8 +13,11 @@ from ga_api.web.api.block.response.block_response import BlockResponse
 router = APIRouter()
 
 
-def get_block_service(block_dao: Annotated[BlockDAO, Depends()]) -> BlockService:
-    return BlockService(block_dao)
+def get_block_service(
+    block_dao: Annotated[BlockDAO, Depends()],
+    professional_dao: Annotated[ProfessionalDAO, Depends()],
+) -> BlockService:
+    return BlockService(block_dao, professional_dao)
 
 
 @router.post("/", response_model=BlockResponse, status_code=201)

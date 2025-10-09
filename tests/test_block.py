@@ -114,7 +114,7 @@ async def test_create_block_with_invalid_professional_id(
         "/api/admin/blocks/", json=request.model_dump(mode="json"), headers=headers
     )
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 @pytest.mark.anyio

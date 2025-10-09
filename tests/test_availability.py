@@ -78,8 +78,11 @@ async def test_register_availability_with_start_time_after_end_time_returns_bad_
     admin_token: str = await login_user_admin(client)
     start_time = datetime.now(timezone.utc) + timedelta(days=1, hours=1)
     end_time = start_time - timedelta(minutes=30)
+
+    professional: Professional = await inject_default_professional(dbsession)
+
     request: AvailabilityRequest = AvailabilityFactory.create_custom_request(
-        start_time=start_time, end_time=end_time
+        start_time=start_time, end_time=end_time, professional_id=professional.id
     )
 
     response: Response = await client.post(
@@ -105,8 +108,11 @@ async def test_register_availability_longer_than_two_hours_returns_bad_request(
     admin_token: str = await login_user_admin(client)
     start_time = datetime.now(timezone.utc) + timedelta(days=1)
     end_time = start_time + timedelta(hours=2, minutes=1)
+
+    professional: Professional = await inject_default_professional(dbsession)
+
     request: AvailabilityRequest = AvailabilityFactory.create_custom_request(
-        start_time=start_time, end_time=end_time
+        start_time=start_time, end_time=end_time, professional_id=professional.id
     )
 
     response: Response = await client.post(
@@ -185,7 +191,9 @@ async def test_register_availability_overlapping_returns_conflict(
     overlapping_start_time = base_start_time + timedelta(minutes=30)
     overlapping_end_time = overlapping_start_time + timedelta(hours=1)
     overlapping_request = AvailabilityFactory.create_custom_request(
-        start_time=overlapping_start_time, end_time=overlapping_end_time
+        start_time=overlapping_start_time,
+        end_time=overlapping_end_time,
+        professional_id=professional.id,
     )
 
     response_overlap: Response = await client.post(
@@ -232,6 +240,31 @@ async def test_register_availability_as_admin_success(
     assert str(body["professional_id"]) == str(request.professional_id)
     assert body["start_time"].replace("Z", "+00:00") == request.start_time.isoformat()
     assert body["end_time"].replace("Z", "+00:00") == request.end_time.isoformat()
+
+
+@pytest.mark.anyio
+async def test_register_availability_as_admin_professional_not_found(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    """
+    Testa o registro de uma nova disponibilidade por um usuário administrador.
+    O fluxo deve dar erro ao não encontrar o profissional.
+    """
+    admin_token: str = await login_user_admin(client)
+
+    request: AvailabilityRequest = AvailabilityFactory.create_default_request(
+        professional_id=uuid.uuid4()
+    )
+
+    response: Response = await client.post(
+        AVAILABILITY_URL,
+        json=request.model_dump(mode="json"),
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 @pytest.mark.anyio

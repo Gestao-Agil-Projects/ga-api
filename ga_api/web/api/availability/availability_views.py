@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from fastapi.param_functions import Depends
 
 from ga_api.db.dao.availability_dao import AvailabilityDAO
+from ga_api.db.dao.professional_dao import ProfessionalDAO
 from ga_api.db.models.users import current_active_user
 from ga_api.services.availability_service import AvailabilityService
 from ga_api.web.api.availability.request.availability_request import AvailabilityRequest
@@ -20,8 +21,9 @@ admin_router = APIRouter()
 
 def get_availability_service(
     availability_dao: Annotated[AvailabilityDAO, Depends()],
+    professional_dao: Annotated[ProfessionalDAO, Depends()],
 ) -> AvailabilityService:
-    return AvailabilityService(availability_dao)
+    return AvailabilityService(availability_dao, professional_dao)
 
 
 @admin_router.post("/", response_model=AvailabilityResponse)

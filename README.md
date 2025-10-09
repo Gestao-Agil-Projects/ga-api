@@ -195,7 +195,7 @@ For running tests on your local machine.
 1. you need to start a database.
 
 I prefer doing it with docker:
-```
+```bash
 docker run -p "5432:5432" -e "POSTGRES_PASSWORD=ga_api" -e "POSTGRES_USER=ga_api" -e "POSTGRES_DB=ga_api" postgres:16.3-bullseye
 ```
 
