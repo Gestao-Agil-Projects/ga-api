@@ -1,7 +1,6 @@
 # ga_api/services/professional_service.py
 
 import uuid
-from datetime import datetime
 from typing import List
 
 from fastapi import Depends, HTTPException, status
@@ -32,7 +31,6 @@ class ProfessionalService:
         request: ProfessionalCreateRequest,
         admin_user: User,
     ) -> Professional:
-        AdminUtils.validate_user_is_admin(admin_user)
 
         new_professional: Professional = Professional(
             full_name=request.full_name,
@@ -67,7 +65,6 @@ class ProfessionalService:
         request: ProfessionalUpdateRequest,
         admin_user: User,
     ) -> Professional:
-        AdminUtils.validate_user_is_admin(admin_user)
         professional = await self.professional_dao.find_by_id(
             professional_id,
         )
@@ -102,17 +99,14 @@ class ProfessionalService:
                     request.specialities,
                 )
 
-        professional.updated_at = datetime.now()
-        professional.updated_by_admin_id = admin_user.id
+        AdminUtils.populate_admin_data(professional, admin_user, update_only=True)
         return await self.professional_dao.save(professional)
 
     async def get_all_professionals_admin(
         self,
-        admin_user: User,
         limit: int,
         offset: int,
     ) -> List[Professional]:
-        AdminUtils.validate_user_is_admin(admin_user)
         return await self.professional_dao.find_all_with_specialities(limit, offset)
 
     async def get_all_professionals(

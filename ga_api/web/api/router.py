@@ -1,5 +1,7 @@
+from fastapi import Depends
 from fastapi.routing import APIRouter
 
+from ga_api.dependencies.auth_dependencies import admin_required
 from ga_api.web.api import (
     availability,
     block,
@@ -15,7 +17,7 @@ from ga_api.web.api import (
 
 api_router = APIRouter()
 
-admin_router = APIRouter(prefix="/admin")
+admin_router = APIRouter(prefix="/admin", dependencies=[Depends(admin_required)])
 
 admin_router.include_router(block.router, prefix="/blocks", tags=["admin", "blocks"])
 

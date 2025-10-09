@@ -27,8 +27,7 @@ async def create_block_endpoint(
 
 @router.delete("/{block_id}", status_code=204)
 async def delete_block_endpoint(
-    user: Annotated[Any, Depends(current_active_user)],
     block_id: UUID,
     block_service: Annotated[BlockService, Depends(get_block_service)],
 ) -> None:
-    await block_service.delete_block(block_id, user)
+    await block_service.delete_block(block_id)

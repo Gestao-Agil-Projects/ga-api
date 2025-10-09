@@ -51,17 +51,16 @@ async def update_professional(
 
 @admin_router.get("/", response_model=List[ProfessionalResponse])
 async def get_all_professionals(
-    admin_user: Annotated[User, Depends(current_active_user)],
     service: ProfessionalService = Depends(),
     limit: int | None = 50,
     offset: int | None = 0,
 ) -> List[ProfessionalResponse]:
-    return await service.get_all_professionals_admin(admin_user, limit, offset)  # type: ignore
+    return await service.get_all_professionals_admin(limit, offset)  # type: ignore
 
 
 @router.get("/", response_model=List[ProfessionalResponse])
 async def get_all_professionals_public(
-    current_user: Annotated[User, Depends(current_active_user)],
+    user: Annotated[User, Depends(current_active_user)],
     service: ProfessionalService = Depends(),
     limit: int | None = 50,
     offset: int | None = 0,

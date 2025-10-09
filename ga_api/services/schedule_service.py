@@ -28,7 +28,6 @@ class SchedulingService:
         request: AdminScheduleRequest,
         admin_user: User,
     ) -> Availability:
-        AdminUtils.validate_user_is_admin(admin_user)
 
         availability = await self._get_and_validate_availability(
             request.availability_id,

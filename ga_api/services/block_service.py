@@ -12,8 +12,6 @@ class BlockService:
         self.block_dao = block_dao
 
     async def create_block(self, data: BlockCreateRequest, user: User) -> Block:
-        AdminUtils.validate_user_is_admin(user)
-
         # todo: fazer uma query no professionals e ver se existe o profissional
 
         block: Block = Block(**data.model_dump())
@@ -21,7 +19,5 @@ class BlockService:
         AdminUtils.populate_admin_data(block, user)
         return await self.block_dao.save(block)
 
-    async def delete_block(self, block_id: UUID, user: User) -> None:
-        AdminUtils.validate_user_is_admin(user)
-
+    async def delete_block(self, block_id: UUID) -> None:
         await self.block_dao.delete_by_id(block_id)

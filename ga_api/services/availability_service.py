@@ -27,7 +27,6 @@ class AvailabilityService:
         # TODO: após demanda do cadastro de profissionais
         # validar com o professional_dao se o id especificado na request existe
 
-        AdminUtils.validate_user_is_admin(user)
         TimeUtils.validate_start_and_end_times(request.start_time, request.end_time)
         TimeUtils.validate_max_two_hours(request.start_time, request.end_time)
         await self._validate_overlapping_times(request.start_time, request.end_time)
@@ -44,8 +43,6 @@ class AvailabilityService:
         request: UpdateAvailabilityRequest,
         user: User,
     ) -> Availability:
-        AdminUtils.validate_user_is_admin(user)
-
         start, end = request.start_time, request.end_time
 
         if TimeUtils.is_interval(start, end):
