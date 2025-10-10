@@ -556,9 +556,9 @@ async def test_get_all_professionals_public_as_authenticated_user_returns_ok(
     body = response.json()
     assert isinstance(body, list)
     # Deve retornar apenas os habilitados
-    for professional in body:
-        assert "id" in professional
-        assert "full_name" in professional
+    for professional_is_enabled in body:
+        assert "id" in professional_is_enabled.get("professional")
+        assert "full_name" in professional_is_enabled.get("professional")
 
 
 @pytest.mark.anyio
@@ -1004,11 +1004,18 @@ async def test_get_all_professionals_returns_specialities_correctly(
 
     # Encontrar o profissional com especialidades
     professional_with_specs = next(
-        (p for p in body if p["full_name"] == "Dra. Ginecologista"), None
+        (
+            professional_is_enabled
+            for professional_is_enabled in body
+            if professional_is_enabled.get("professional").get("full_name")
+            == "Dra. Ginecologista"
+        ),
+        None,
     )
+    professional_with_specs = professional_with_specs.get("professional")
     assert professional_with_specs is not None
     assert "specialities" in professional_with_specs
-    assert len(professional_with_specs["specialities"]) == 2
+    assert len(professional_with_specs.get("specialities")) == 2
 
     spec_titles = {spec["title"] for spec in professional_with_specs["specialities"]}
     assert spec_titles == {"Ginecologia", "Obstetrícia"}
@@ -1022,11 +1029,18 @@ async def test_get_all_professionals_returns_specialities_correctly(
 
     # Encontrar o profissional sem especialidades
     professional_without_specs = next(
-        (p for p in body if p["full_name"] == "Dr. Sem Especialidades"), None
+        (
+            professional_is_enabled
+            for professional_is_enabled in body
+            if professional_is_enabled.get("professional").get("full_name")
+            == "Dr. Sem Especialidades"
+        ),
+        None,
     )
+    professional_without_specs = professional_without_specs.get("professional")
     assert professional_without_specs is not None
     assert "specialities" in professional_without_specs
-    assert len(professional_without_specs["specialities"]) == 0
+    assert len(professional_without_specs.get("specialities")) == 0
 
 
 @pytest.mark.anyio
@@ -1077,8 +1091,15 @@ async def test_get_public_professionals_returns_specialities_correctly(
 
     # Encontrar o profissional criado
     professional = next(
-        (p for p in body if p["full_name"] == "Dr. Urologista Público"), None
+        (
+            professional_is_enabled
+            for professional_is_enabled in body
+            if professional_is_enabled.get("professional").get("full_name")
+            == "Dr. Urologista Público"
+        ),
+        None,
     )
+    professional = professional.get("professional")
     assert professional is not None
     assert "specialities" in professional
     assert len(professional["specialities"]) == 2
@@ -1090,3 +1111,132 @@ async def test_get_public_professionals_returns_specialities_correctly(
     for spec in professional["specialities"]:
         assert "id" in spec
         assert "title" in spec
+
+
+@pytest.mark.anyio
+async def test_get_all_professionals_admin_returns_is_blocked_flag(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    admin_token = await login_user_admin(client)
+
+    # Criar profissionais com estados diferentes
+    enabled_blocked = ProfessionalFactory.create_custom_request(is_enabled=True)
+    enabled_blocked.email = "foo@mail.com"
+    enabled_blocked.phone = "123"
+    enabled_unblocked = ProfessionalFactory.create_custom_request(is_enabled=True)
+    enabled_unblocked.email = "foo2@mail.com"
+    enabled_unblocked.phone = "1234"
+    disabled_blocked = ProfessionalFactory.create_custom_request(is_enabled=False)
+
+    for req in [enabled_blocked, enabled_unblocked, disabled_blocked]:
+        await client.post(
+            ADMIN_PROFESSIONAL_URL,
+            json=req.model_dump(mode="json"),
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+
+    response = await client.get(
+        ADMIN_PROFESSIONAL_URL,
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    body = response.json()
+    assert isinstance(body, list)
+    assert len(body) == 3
+
+    for item in body:
+        assert "professional" in item
+        assert "is_blocked" in item
+        assert isinstance(item["is_blocked"], bool)
+        assert "id" in item["professional"]
+        assert "full_name" in item["professional"]
+
+
+@pytest.mark.anyio
+async def test_get_all_professionals_public_returns_only_enabled(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    admin_token = await login_user_admin(client)
+    user_token = await register_and_login_default_user(client)
+
+    # Criar profissionais
+    enabled_professional = ProfessionalFactory.create_custom_request(is_enabled=True)
+    disabled_professional = ProfessionalFactory.create_custom_request(is_enabled=False)
+    disabled_professional.email = "foo@mail.com"
+    disabled_professional.phone = "123123131"
+
+    for req in [enabled_professional, disabled_professional]:
+        await client.post(
+            ADMIN_PROFESSIONAL_URL,
+            json=req.model_dump(mode="json"),
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+
+    response = await client.get(
+        PUBLIC_PROFESSIONAL_URL,
+        headers={"Authorization": f"Bearer {user_token}"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    body = response.json()
+    assert isinstance(body, list)
+    assert len(body) == 1
+
+    for item in body:
+        assert "professional" in item
+        assert "is_blocked" in item
+        assert item["professional"]["is_enabled"] is True
+        assert "id" in item["professional"]
+        assert "full_name" in item["professional"]
+
+
+@pytest.mark.anyio
+async def test_get_all_professionals_admin_and_public_structure_consistency(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    admin_token = await login_user_admin(client)
+    user_token = await register_and_login_default_user(client)
+
+    # Criar um profissional
+    professional_req = ProfessionalFactory.create_custom_request(is_enabled=True)
+    create_resp = await client.post(
+        ADMIN_PROFESSIONAL_URL,
+        json=professional_req.model_dump(mode="json"),
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    professional_id = create_resp.json()["id"]
+
+    # Validar estrutura admin
+    admin_resp = await client.get(
+        ADMIN_PROFESSIONAL_URL,
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    admin_body = admin_resp.json()
+    professional_item = next(
+        (item for item in admin_body if item["professional"]["id"] == professional_id),
+        None,
+    )
+    assert professional_item is not None
+    assert "is_blocked" in professional_item
+    assert professional_item["professional"]["id"] == professional_id
+
+    # Validar estrutura público
+    public_resp = await client.get(
+        PUBLIC_PROFESSIONAL_URL,
+        headers={"Authorization": f"Bearer {user_token}"},
+    )
+    public_body = public_resp.json()
+    professional_item_pub = next(
+        (item for item in public_body if item["professional"]["id"] == professional_id),
+        None,
+    )
+    assert professional_item_pub is not None
+    assert "is_blocked" in professional_item_pub
+    assert professional_item_pub["professional"]["is_enabled"] is True

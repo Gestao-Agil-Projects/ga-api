@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 
 from starlette import status
@@ -35,3 +35,9 @@ class BlockService:
 
     async def delete_block(self, block_id: UUID) -> None:
         await self.block_dao.delete_by_id(block_id)
+
+    async def get_all_blocks_from_professional(
+        self,
+        professional_id: UUID,
+    ) -> List[Block]:
+        return await self.block_dao.find_all_by_professional_id(professional_id)

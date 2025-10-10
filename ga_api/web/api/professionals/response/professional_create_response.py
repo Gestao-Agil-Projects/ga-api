@@ -11,5 +11,6 @@ class ProfessionalResponse(BaseModel):
     full_name: str
     bio: Optional[str] = None
     specialities: Optional[List[SpecialityDTO]] = []
+    is_enabled: bool
 
     model_config = ConfigDict(from_attributes=True)

@@ -20,6 +20,7 @@ from tests.utils import (
 )
 
 AVAILABILITY_URL = "/api/admin/availability/"
+PATIENT_URL = "/api/availability"
 
 
 @pytest.mark.anyio
@@ -1161,3 +1162,94 @@ async def test_update_availability_multiple_times_success(
     assert datetime.fromisoformat(body["end_time"]).replace(
         tzinfo=None
     ) == newer_end_time.replace(tzinfo=None)
+
+
+@pytest.mark.anyio
+async def test_get_availabilities_admin_returns_all(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    admin_token = await login_user_admin(client)
+    professional: Professional = await inject_default_professional(dbsession)
+    dao = AvailabilityDAO(dbsession)
+
+    now = datetime.now(timezone.utc)
+    availabilities = [
+        AvailabilityFactory.create_availability_model(
+            professional.id,
+            start_time=now - timedelta(days=2),
+            end_time=now - timedelta(days=1),
+            status=AvailabilityStatus.TAKEN,
+        ),
+        AvailabilityFactory.create_availability_model(
+            professional.id,
+            start_time=now,
+            end_time=now + timedelta(hours=1),
+            status=AvailabilityStatus.AVAILABLE,
+        ),
+        AvailabilityFactory.create_availability_model(
+            professional.id,
+            start_time=now + timedelta(days=1),
+            end_time=now + timedelta(days=1, hours=1),
+            status=AvailabilityStatus.CANCELED,
+        ),
+    ]
+    await save_and_expect(dao, availabilities, 3)
+
+    response = await client.get(
+        f"{AVAILABILITY_URL}?professional_id={professional.id}",
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 3
+    returned_ids = {item["id"] for item in data}
+    for availability in availabilities:
+        assert str(availability.id) in returned_ids
+
+
+@pytest.mark.anyio
+async def test_get_availabilities_patient_returns_only_available_future(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    patient_token = await register_and_login_default_user(client)
+    professional: Professional = await inject_default_professional(dbsession)
+    dao = AvailabilityDAO(dbsession)
+
+    now = datetime.now(timezone.utc)
+    availabilities = [
+        AvailabilityFactory.create_availability_model(
+            professional.id,
+            start_time=now - timedelta(days=2),
+            end_time=now - timedelta(days=1),
+            status=AvailabilityStatus.AVAILABLE,
+        ),
+        AvailabilityFactory.create_availability_model(
+            professional.id,
+            start_time=now + timedelta(hours=1),
+            end_time=now + timedelta(hours=2),
+            status=AvailabilityStatus.AVAILABLE,
+        ),
+        AvailabilityFactory.create_availability_model(
+            professional.id,
+            start_time=now + timedelta(days=1),
+            end_time=now + timedelta(days=1, hours=1),
+            status=AvailabilityStatus.TAKEN,
+        ),
+    ]
+    await save_and_expect(dao, availabilities, 3)
+
+    response = await client.get(
+        f"{PATIENT_URL}/?professional_id={professional.id}",
+        headers={"Authorization": f"Bearer {patient_token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["status"] == AvailabilityStatus.AVAILABLE.value
+    assert datetime.fromisoformat(data[0]["start_time"]).replace(
+        tzinfo=None
+    ) > now.replace(tzinfo=None)

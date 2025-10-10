@@ -1,8 +1,8 @@
 {
 	"info": {
-		"_postman_id": "b74febfc-47fd-490f-9e7e-bc71e8fc8a85",
-		"name": "ga-api v2",
-		"description": "futuras melhorias:\n\n1. corrigir o update my user para adicionar campos de full_name, etc.\n    \n2. corrigir o availability para não retornar se tiver algum bloqueio no profissional\n    \n\nCaso encontre alguma inconsistência, favor avisar a equipe de backend.",
+		"_postman_id": "972f8349-db04-4ac1-9fcf-550f70de116a",
+		"name": "ga-api v3",
+		"description": "Caso encontre alguma inconsistência, favor avisar a equipe de backend.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "37212133"
 	},
@@ -651,6 +651,93 @@
 						"description": "Generated from cURL: curl -X 'PUT' \\\n  'http://localhost:8000/api/admin/availability/f09a1a77-6dcf-4c05-9e9f-6a7e03a7d29a' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"start_time\": \"2025-10-07T23:31:13.393Z\",\n  \"end_time\": \"2025-10-07T23:31:13.393Z\",\n  \"status\": \"available\"\n}'"
 					},
 					"response": []
+				},
+				{
+					"name": "admin get availabilities from professional",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NzM2MDZhZi01MDdkLTRhY2UtOTUxMS02ODdlNWI1MDRlOGYiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl19.HbXpdpEbsXUlbLWGkjnb-aNbGdzJnq4HDkB_H9XlxEY"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/admin/availability/?professional_id=e37f218f-80a6-466a-bb09-26f750f0a625&limit=50&offset=0",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"availability",
+								""
+							],
+							"query": [
+								{
+									"key": "professional_id",
+									"value": "e37f218f-80a6-466a-bb09-26f750f0a625"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/admin/availability/?professional_id=e37f218f-80a6-466a-bb09-26f750f0a625&limit=50&offset=0' \\\n  -H 'accept: application/json' \\\n  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NzM2MDZhZi01MDdkLTRhY2UtOTUxMS02ODdlNWI1MDRlOGYiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl19.HbXpdpEbsXUlbLWGkjnb-aNbGdzJnq4HDkB_H9XlxEY'"
+					},
+					"response": []
+				},
+				{
+					"name": "patient get available availabilities from professional",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NzM2MDZhZi01MDdkLTRhY2UtOTUxMS02ODdlNWI1MDRlOGYiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl19.HbXpdpEbsXUlbLWGkjnb-aNbGdzJnq4HDkB_H9XlxEY"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/availability/?professional_id=e37f218f-80a6-466a-bb09-26f750f0a625&limit=50&offset=0",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"availability",
+								""
+							],
+							"query": [
+								{
+									"key": "professional_id",
+									"value": "e37f218f-80a6-466a-bb09-26f750f0a625"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/availability/?professional_id=e37f218f-80a6-466a-bb09-26f750f0a625&limit=50&offset=0' \\\n  -H 'accept: application/json' \\\n  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NzM2MDZhZi01MDdkLTRhY2UtOTUxMS02ODdlNWI1MDRlOGYiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl19.HbXpdpEbsXUlbLWGkjnb-aNbGdzJnq4HDkB_H9XlxEY'"
+					},
+					"response": []
 				}
 			],
 			"description": "gerenciar horários disponíveis."
@@ -658,41 +745,6 @@
 		{
 			"name": "professionals",
 			"item": [
-				{
-					"name": "create professional",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiOTIyMWZmYzktNjQwZi00MzcyLTg2ZDMtY2U2NDJjYmE1NjAzIiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNTcxNTA0MTkzfQ.M10bjOe45I5Ncu_uXvOmVV8QxnL-nZfcH96U90JaocI",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"full_name\": \"Dr. Carlos Andrade\",\n  \"email\": \"carlos.andrade@email.com\",\n  \"phone\": \"51999887766\",\n  \"bio\": \"Especialista em cardiologia com mais de 15 anos de experiência.\",\n  \"is_enabled\": true,\n  \"speciality_ids\": []\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{api_url}}/api/admin/professionals/",
-							"host": [
-								"{{api_url}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"professionals",
-								""
-							]
-						}
-					},
-					"response": []
-				},
 				{
 					"name": "admin get all professionals",
 					"request": {
@@ -802,6 +854,45 @@
 						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/professionals/?limit=50&offset=0' \\\n  -H 'accept: application/json'"
 					},
 					"response": []
+				},
+				{
+					"name": "create professional",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"full_name\": \"João da Silva\",\n  \"bio\": \"Profissional com 10 anos de experiência\",\n  \"phone\": \"51912345678\",\n  \"email\": \"jose.silva@gmail.com\",\n  \"is_enabled\": true,\n  \"specialities\": [\"8ad5c300-5a01-4f93-be32-ca4e76f425e6\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/admin/professionals/",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"professionals",
+								""
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/admin/professionals/' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"full_name\": \"string\",\n  \"bio\": \"string\",\n  \"phone\": \"string\",\n  \"email\": \"user@example.com\",\n  \"is_enabled\": true,\n  \"specialities\": []\n}'"
+					},
+					"response": []
 				}
 			],
 			"description": "gerenciar profissionais."
@@ -871,6 +962,36 @@
 							]
 						},
 						"description": "Generated from cURL: curl -X 'DELETE' \\\n  'http://localhost:8000/api/admin/blocks/280603d7-8557-4bf3-8dc0-8d68bd8708a6' \\\n  -H 'accept: */*'"
+					},
+					"response": []
+				},
+				{
+					"name": "Get blocks from professional",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NzM2MDZhZi01MDdkLTRhY2UtOTUxMS02ODdlNWI1MDRlOGYiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl19.HbXpdpEbsXUlbLWGkjnb-aNbGdzJnq4HDkB_H9XlxEY"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/admin/blocks/e37f218f-80a6-466a-bb09-26f750f0a625",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"blocks",
+								"e37f218f-80a6-466a-bb09-26f750f0a625"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/admin/blocks/e37f218f-80a6-466a-bb09-26f750f0a625' \\\n  -H 'accept: application/json' \\\n  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NzM2MDZhZi01MDdkLTRhY2UtOTUxMS02ODdlNWI1MDRlOGYiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl19.HbXpdpEbsXUlbLWGkjnb-aNbGdzJnq4HDkB_H9XlxEY'"
 					},
 					"response": []
 				}

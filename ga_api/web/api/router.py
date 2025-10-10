@@ -19,7 +19,11 @@ api_router = APIRouter()
 
 admin_router = APIRouter(prefix="/admin", dependencies=[Depends(admin_required)])
 
-admin_router.include_router(block.router, prefix="/blocks", tags=["admin", "blocks"])
+admin_router.include_router(
+    block.admin_router,
+    prefix="/blocks",
+    tags=["admin", "blocks"],
+)
 
 admin_router.include_router(
     availability.admin_router,
@@ -56,3 +60,8 @@ api_router.include_router(
     tags=["professionals"],
 )
 api_router.include_router(schedule.router, prefix="/schedule", tags=["schedule"])
+api_router.include_router(
+    availability.router,
+    prefix="/availability",
+    tags=["availability"],
+)

@@ -18,6 +18,9 @@ from ga_api.web.api.professionals.request.professional_create_request import (
 from ga_api.web.api.professionals.request.professional_update_request import (
     ProfessionalUpdateRequest,
 )
+from ga_api.web.api.professionals.response.professional_block_response import (
+    ProfessionalBlockResponse,
+)
 
 
 class ProfessionalService:
@@ -106,19 +109,30 @@ class ProfessionalService:
         self,
         limit: int,
         offset: int,
-    ) -> List[Professional]:
-        return await self.professional_dao.find_all_with_specialities(limit, offset)
+    ) -> List[ProfessionalBlockResponse]:
+        professionals_and_blocked_list = (
+            await self.professional_dao.find_all_with_specialities(limit, offset)
+        )
+
+        return [
+            ProfessionalBlockResponse(professional=prof, is_blocked=is_blocked)  # type: ignore
+            for prof, is_blocked in professionals_and_blocked_list
+        ]
 
     async def get_all_professionals(
         self,
         limit: int,
         offset: int,
-    ) -> List[Professional]:
-        """
-        Retorna apenas profissionais habilitados para usuários não-admin.
-        """
-        return await self.professional_dao.find_all_with_specialities(
-            limit,
-            offset,
-            only_enabled=True,
+    ) -> List[ProfessionalBlockResponse]:
+        professionals_and_blocked_list = (
+            await self.professional_dao.find_all_with_specialities(
+                limit,
+                offset,
+                only_enabled=True,
+            )
         )
+
+        return [
+            ProfessionalBlockResponse(professional=prof, is_blocked=is_blocked)  # type: ignore
+            for prof, is_blocked in professionals_and_blocked_list
+        ]

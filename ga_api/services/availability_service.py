@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 
 from starlette import status
@@ -10,6 +10,7 @@ from ga_api.db.dao.professional_dao import ProfessionalDAO
 from ga_api.db.models.availability_model import Availability
 from ga_api.db.models.professionals_model import Professional
 from ga_api.db.models.users import User
+from ga_api.enums.availability_status import AvailabilityStatus
 from ga_api.utils.admin_utils import AdminUtils
 from ga_api.utils.time_utils import TimeUtils
 from ga_api.web.api.availability.request.availability_request import AvailabilityRequest
@@ -110,3 +111,33 @@ class AvailabilityService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail="time interval is conflicting with existent availability",
             )
+
+    async def get_availabilities_patient(
+        self,
+        professional_id: Optional[UUID],
+        limit: int,
+        offset: int,
+    ) -> List[Availability]:
+        return await self.availability_dao.find_all_not_blocked(
+            limit=limit,
+            offset=offset,
+            professional_id=professional_id,
+            status=AvailabilityStatus.AVAILABLE,
+            after=datetime.now(),
+        )
+
+    async def get_availabilities_admin(
+        self,
+        professional_id: Optional[UUID],
+        limit: int,
+        offset: int,
+        status: Optional[AvailabilityStatus] = None,
+        after: Optional[datetime] = None,
+    ) -> List[Availability]:
+        return await self.availability_dao.find_all_not_blocked(
+            limit=limit,
+            offset=offset,
+            professional_id=professional_id,
+            status=status,
+            after=after,
+        )
