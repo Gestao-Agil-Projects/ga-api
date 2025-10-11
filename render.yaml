@@ -2,7 +2,7 @@ services:
   - type: web
     name: fastapi-app
     env: python
-    plan: starter
+    plan: free
     region: oregon
     buildCommand: pip install poetry && poetry config virtualenvs.create false && poetry install --no-dev
     startCommand: poetry run python -m ga_api
@@ -14,5 +14,5 @@ services:
 
 databases:
   - name: fastapi-db
-    plan: starter
+    plan: free
     region: oregon
