@@ -55,11 +55,8 @@ class Settings(BaseSettings):
 
     @property
     def db_url(self) -> URL:
-        """
-        Assemble database URL from settings.
-
-        :return: database URL.
-        """
+        if os.getenv("DATABASE_URL"):
+            return URL(os.getenv("DATABASE_URL"))
         return URL.build(
             scheme="postgresql+asyncpg",
             host=self.db_host,
