@@ -5,7 +5,7 @@ services:
     plan: free
     region: oregon
     buildCommand: pip install poetry && poetry config virtualenvs.create false && poetry install
-    startCommand: poetry run uvicorn ga_api.main:app --host 0.0.0.0 --port $PORT
+    startCommand: poetry run python -m ga_api
     envVars:
       - key: DATABASE_URL
         fromDatabase:
