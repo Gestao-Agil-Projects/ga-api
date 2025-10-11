@@ -4,7 +4,7 @@ services:
     env: python
     plan: free
     region: oregon
-    buildCommand: pip install poetry && poetry config virtualenvs.create false && poetry install --no-dev
+    buildCommand: pip install poetry && poetry config virtualenvs.create false && poetry install
     startCommand: poetry run python -m ga_api
     envVars:
       - key: DATABASE_URL
