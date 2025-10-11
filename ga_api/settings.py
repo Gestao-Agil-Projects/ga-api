@@ -33,8 +33,9 @@ class Settings(BaseSettings):
     mail_server: str = os.getenv("MAIL_SERVER", "")
     mail_port: str = os.getenv("MAIL_PORT", "")
 
-    host: str = "127.0.0.1"
-    port: int = 8000
+    host: str = "0.0.0.0"
+    port: int = int(os.getenv("PORT", 8000))
+
     # quantity of workers for uvicorn
     workers_count: int = 1
     # Enable uvicorn reloading
