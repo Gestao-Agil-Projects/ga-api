@@ -56,8 +56,11 @@ class Settings(BaseSettings):
 
     @property
     def db_url(self) -> URL:
-        if os.getenv("DATABASE_URL"):
-            return URL(os.getenv("DATABASE_URL"))
+        db_url = os.getenv("DATABASE_URL")
+        if db_url:
+            if db_url.startswith("postgres://"):
+                db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+            return URL(db_url)
         return URL.build(
             scheme="postgresql+asyncpg",
             host=self.db_host,
