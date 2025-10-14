@@ -15,5 +15,4 @@ class AvailabilityResponse(BaseModel):
     professional_id: UUID
     patient_id: Optional[UUID] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

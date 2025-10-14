@@ -12,7 +12,6 @@ from ga_api.web.api import (
     speciality,
     users,
 )
-from ga_api.web.api.schedule.schedule_views import router as schedule_router
 
 api_router = APIRouter()
 
@@ -54,4 +53,4 @@ api_router.include_router(
     prefix="/professionals",
     tags=["professionals"],
 )
-api_router.include_router(schedule_router, prefix="/schedule", tags=["schedule"])
+api_router.include_router(schedule.router, prefix="/schedule", tags=["schedule"])

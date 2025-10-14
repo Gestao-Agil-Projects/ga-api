@@ -1,10 +1,7 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, Query
 
-from ga_api.db.dao.availability_dao import AvailabilityDAO
-from ga_api.db.dependencies import get_db_session
 from ga_api.web.api.availability.response.availability_response import AvailabilityResponse
 from ga_api.db.models.users import User, current_active_user
 from ga_api.services.schedule_service import SchedulingService
@@ -42,8 +39,16 @@ async def book_for_patient(
 @router.get("/", response_model=List[AvailabilityResponse])
 async def get_my_schedules(
     user: User = Depends(current_active_user),
-    session: AsyncSession = Depends(get_db_session),
+    scheduling_service: SchedulingService = Depends(),
+    limit: int = Query(default=50, le=100),
+    skip: int = Query(default=0, ge=0),
 ):
-    dao = AvailabilityDAO(session)
-    availabilities = await dao.find_by_patient_id(user.id)
+    """
+    Retorna os agendamentos do usuário autenticado com paginação.
+    """
+    availabilities = await scheduling_service.get_user_schedules(
+        user=user,
+        limit=limit,
+        offset=skip,
+    )
     return [AvailabilityResponse.model_validate(a) for a in availabilities]

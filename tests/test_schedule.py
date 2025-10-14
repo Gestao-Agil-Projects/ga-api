@@ -691,3 +691,237 @@ async def test_invalid_uuid_format(
     )
 
     assert response.status_code == 422  # Validation error
+
+
+# ==================== TESTES GET SCHEDULES ====================
+
+
+async def test_get_my_schedules_success(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    patient_user: User,
+    dbsession: AsyncSession,
+):
+    """
+    Testa que um usuário autenticado pode ver seus próprios agendamentos.
+    """
+    availability_dao: AvailabilityDAO = AvailabilityDAO(dbsession)
+    user_dao: UserDAO = UserDAO(dbsession)
+    
+    patient_token = await register_and_login_default_user(client)
+    patient: User = await user_dao.find_by_email("mock@mail.com")
+
+    professional: Professional = await inject_default_professional(dbsession)
+
+    # Cria múltiplos agendamentos para o paciente
+    base_time = datetime.now(timezone.utc).replace(
+        hour=10, minute=0, second=0, microsecond=0
+    ) + timedelta(days=1)
+
+    availability1 = AvailabilityFactory.create_availability_model(
+        professional_id=professional.id,
+        start_time=base_time,
+        end_time=base_time + timedelta(hours=1),
+        status=AvailabilityStatus.TAKEN,
+    )
+    availability1.patient_id = patient.id
+
+    availability2 = AvailabilityFactory.create_availability_model(
+        professional_id=professional.id,
+        start_time=base_time + timedelta(hours=2),
+        end_time=base_time + timedelta(hours=3),
+        status=AvailabilityStatus.TAKEN,
+    )
+    availability2.patient_id = patient.id
+
+    await save_and_expect(availability_dao, availability1, 1)
+    await save_and_expect(availability_dao, availability2, 2)
+
+    url = fastapi_app.url_path_for("get_my_schedules")
+
+    response = await client.get(
+        url,
+        headers={"Authorization": f"Bearer {patient_token}"},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert len(data) == 2
+    
+    # Verifica que todos os agendamentos pertencem ao usuário
+    for schedule in data:
+        assert schedule["patient_id"] == str(patient.id)
+        assert schedule["status"] == "taken"
+        assert schedule["professional_id"] == str(professional.id)
+
+
+async def test_get_my_schedules_empty(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+):
+    """
+    Testa que retorna lista vazia quando o usuário não tem agendamentos.
+    """
+    patient_token = await register_and_login_default_user(client)
+
+    url = fastapi_app.url_path_for("get_my_schedules")
+
+    response = await client.get(
+        url,
+        headers={"Authorization": f"Bearer {patient_token}"},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert len(data) == 0
+    assert data == []
+
+
+async def test_get_my_schedules_unauthorized(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+):
+    """
+    Testa que usuário não autenticado não pode acessar agendamentos.
+    """
+    url = fastapi_app.url_path_for("get_my_schedules")
+
+    response = await client.get(
+        url,
+        headers={"Authorization": "Bearer invalid_token"},
+    )
+
+    assert response.status_code == 401
+
+
+async def test_get_my_schedules_with_pagination(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    patient_user: User,
+    dbsession: AsyncSession,
+):
+    """
+    Testa a paginação do endpoint get_my_schedules.
+    """
+    availability_dao: AvailabilityDAO = AvailabilityDAO(dbsession)
+    user_dao: UserDAO = UserDAO(dbsession)
+    
+    patient_token = await register_and_login_default_user(client)
+    patient: User = await user_dao.find_by_email("mock@mail.com")
+
+    professional: Professional = await inject_default_professional(dbsession)
+
+    # Cria 5 agendamentos para testar paginação
+    base_time = datetime.now(timezone.utc).replace(
+        hour=10, minute=0, second=0, microsecond=0
+    ) + timedelta(days=1)
+
+    for i in range(5):
+        availability = AvailabilityFactory.create_availability_model(
+            professional_id=professional.id,
+            start_time=base_time + timedelta(hours=i),
+            end_time=base_time + timedelta(hours=i+1),
+            status=AvailabilityStatus.TAKEN,
+        )
+        availability.patient_id = patient.id
+        await save_and_expect(availability_dao, availability, i+1)
+
+    url = fastapi_app.url_path_for("get_my_schedules")
+
+    # Testa primeira página (limit=2)
+    response1 = await client.get(
+        url,
+        params={"limit": 2, "skip": 0},
+        headers={"Authorization": f"Bearer {patient_token}"},
+    )
+
+    assert response1.status_code == 200
+    data1 = response1.json()
+    assert len(data1) == 2
+
+    # Testa segunda página (limit=2, skip=2)
+    response2 = await client.get(
+        url,
+        params={"limit": 2, "skip": 2},
+        headers={"Authorization": f"Bearer {patient_token}"},
+    )
+
+    assert response2.status_code == 200
+    data2 = response2.json()
+    assert len(data2) == 2
+
+    # Testa terceira página (limit=2, skip=4)
+    response3 = await client.get(
+        url,
+        params={"limit": 2, "skip": 4},
+        headers={"Authorization": f"Bearer {patient_token}"},
+    )
+
+    assert response3.status_code == 200
+    data3 = response3.json()
+    assert len(data3) == 1  # Só sobrou 1 registro
+
+
+async def test_get_my_schedules_only_user_schedules(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    patient_user: User,
+    dbsession: AsyncSession,
+):
+    """
+    Testa que um usuário só vê seus próprios agendamentos, não de outros usuários.
+    """
+    availability_dao: AvailabilityDAO = AvailabilityDAO(dbsession)
+    user_dao: UserDAO = UserDAO(dbsession)
+    
+    # Cria primeiro usuário
+    patient1_token = await register_and_login_default_user(client)
+    patient1: User = await user_dao.find_by_email("mock@mail.com")
+
+    # Cria segundo usuário (simulando)
+    other_user = UserFactory.create_user_model(email="other@example.com")
+    await save_and_expect(user_dao, other_user, 2)
+
+    professional: Professional = await inject_default_professional(dbsession)
+
+    base_time = datetime.now(timezone.utc).replace(
+        hour=10, minute=0, second=0, microsecond=0
+    ) + timedelta(days=1)
+
+    # Agendamento do primeiro usuário
+    availability1 = AvailabilityFactory.create_availability_model(
+        professional_id=professional.id,
+        start_time=base_time,
+        end_time=base_time + timedelta(hours=1),
+        status=AvailabilityStatus.TAKEN,
+    )
+    availability1.patient_id = patient1.id
+
+    # Agendamento do segundo usuário
+    availability2 = AvailabilityFactory.create_availability_model(
+        professional_id=professional.id,
+        start_time=base_time + timedelta(hours=2),
+        end_time=base_time + timedelta(hours=3),
+        status=AvailabilityStatus.TAKEN,
+    )
+    availability2.patient_id = other_user.id
+
+    await save_and_expect(availability_dao, availability1, 1)
+    await save_and_expect(availability_dao, availability2, 2)
+
+    url = fastapi_app.url_path_for("get_my_schedules")
+
+    response = await client.get(
+        url,
+        headers={"Authorization": f"Bearer {patient1_token}"},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert len(data) == 1  # Só deve ver seus próprios agendamentos
+    assert data[0]["patient_id"] == str(patient1.id)
+    assert data[0]["patient_id"] != str(other_user.id)

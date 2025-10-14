@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from sqlalchemy import select
 
 from ga_api.db.dao.abstract_dao import AbstractDAO
 from ga_api.db.dependencies import get_db_session
@@ -30,8 +30,11 @@ class AvailabilityDAO(AbstractDAO[Availability]):
 
         return await self.exists(*conditions)
 
-    async def find_by_patient_id(self, patient_id: UUID):
+    async def find_by_patient_id(self, patient_id: UUID, limit: int = 50, offset: int = 0):
         result = await self._session.execute(
-            select(Availability).where(Availability.patient_id == patient_id)
+            select(Availability)
+            .where(Availability.patient_id == patient_id)
+            .limit(limit)
+            .offset(offset)
         )
         return result.scalars().all()
