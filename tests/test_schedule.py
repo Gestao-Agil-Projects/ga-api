@@ -27,7 +27,6 @@ from tests.utils import (
 async def test_book_appointment_by_patient_success(
     fastapi_app: FastAPI,
     client: AsyncClient,
-    patient_user: User,
     dbsession: AsyncSession,
 ):
     """
@@ -66,7 +65,6 @@ async def test_book_appointment_by_patient_success(
 async def test_book_appointment_by_patient_unauthorized(
     fastapi_app: FastAPI,
     client: AsyncClient,
-    patient_user: User,
     dbsession: AsyncSession,
 ):
     """
@@ -91,14 +89,19 @@ async def test_book_appointment_by_patient_unauthorized(
 async def test_book_appointment_by_patient_success(
     fastapi_app: FastAPI,
     client: AsyncClient,
-    patient_user: User,
     dbsession: AsyncSession,
 ):
     """
     Testa o fluxo de sucesso onde um paciente logado agenda um horário.
     """
+
     availability_dao: AvailabilityDAO = AvailabilityDAO(dbsession)
+    user_dao: UserDAO = UserDAO(dbsession)
+
     patient_token = await register_and_login_default_user(client)
+    patient_user = await user_dao.find_by_email(
+        UserFactory.create_default_user_request().email
+    )
 
     professional: Professional = await inject_default_professional(dbsession)
 
@@ -130,7 +133,6 @@ async def test_book_appointment_by_patient_success(
 async def test_book_appointment_by_patient_unauthorized(
     fastapi_app: FastAPI,
     client: AsyncClient,
-    patient_user: User,
     dbsession: AsyncSession,
 ):
     """
@@ -175,7 +177,6 @@ async def test_book_appointment_availability_not_found(
 async def test_book_appointment_already_taken(
     fastapi_app: FastAPI,
     client: AsyncClient,
-    patient_user: User,
     dbsession: AsyncSession,
 ):
     """
@@ -209,7 +210,6 @@ async def test_book_appointment_already_taken(
 async def test_book_appointment_conflicting_schedule(
     fastapi_app: FastAPI,
     client: AsyncClient,
-    patient_user: User,
     dbsession: AsyncSession,
 ):
     """
@@ -265,14 +265,18 @@ async def test_book_appointment_conflicting_schedule(
 async def test_book_multiple_appointments_non_conflicting(
     fastapi_app: FastAPI,
     client: AsyncClient,
-    patient_user: User,
     dbsession: AsyncSession,
 ):
     """
     Testa que um paciente pode agendar múltiplos horários não conflitantes.
     """
     availability_dao: AvailabilityDAO = AvailabilityDAO(dbsession)
+    user_dao: UserDAO = UserDAO(dbsession)
+
     patient_token = await register_and_login_default_user(client)
+    patient_user = await user_dao.find_by_email(
+        UserFactory.create_default_user_request().email
+    )
 
     professional: Professional = await inject_default_professional(dbsession)
 

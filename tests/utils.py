@@ -11,6 +11,7 @@ from tests.factories.user_factory import UserFactory
 
 
 async def register_user(client: AsyncClient, request: UserCreate) -> None:
+    print(request.model_dump(mode="json"))
     await client.post(
         "/api/auth/register",
         json=request.model_dump(mode="json"),

@@ -48,6 +48,12 @@ admin_router.include_router(
     tags=["admin", "speciality"],
 )
 
+admin_router.include_router(
+    users.admin_router,
+    prefix="/auth",
+    tags=["admin", "auth"],
+)
+
 api_router.include_router(admin_router)
 api_router.include_router(monitoring.router)
 api_router.include_router(users.router)
