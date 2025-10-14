@@ -17,6 +17,8 @@ services:
       GA_API_DB_USER: ga_api
       GA_API_DB_PASS: ga_api
       GA_API_DB_BASE: ga_api
+    ports:
+      - "8000:8000"
 
   db:
     image: postgres:16.3-bullseye

@@ -1,7 +1,11 @@
-from typing import Any
+from typing import Any, List
 
 from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from ga_api.db.dao.availability_dao import AvailabilityDAO
+from ga_api.db.dependencies import get_db_session
+from ga_api.web.api.availability.response.availability_response import AvailabilityResponse
 from ga_api.db.models.users import User, current_active_user
 from ga_api.services.schedule_service import SchedulingService
 from ga_api.web.api.schedule.request.admin_schedule_request import AdminScheduleRequest
@@ -33,3 +37,13 @@ async def book_for_patient(
         request,
         admin,
     )
+
+
+@router.get("/", response_model=List[AvailabilityResponse])
+async def get_my_schedules(
+    user: User = Depends(current_active_user),
+    session: AsyncSession = Depends(get_db_session),
+):
+    dao = AvailabilityDAO(session)
+    availabilities = await dao.find_by_patient_id(user.id)
+    return [AvailabilityResponse.model_validate(a) for a in availabilities]
