@@ -20,6 +20,7 @@ from tests.utils import (
     inject_default_professional,
     login_user_admin,
     register_and_login_default_user,
+    register_user,
     save_and_expect,
 )
 
@@ -881,9 +882,13 @@ async def test_get_my_schedules_only_user_schedules(
     patient1_token = await register_and_login_default_user(client)
     patient1: User = await user_dao.find_by_email("mock@mail.com")
 
-    # Cria segundo usuário (simulando)
-    other_user = UserFactory.create_user_model(email="other@example.com")
-    await save_and_expect(user_dao, other_user, 2)
+    # Cria segundo usuário via registro
+    second_user_request = UserFactory.create_minimal_user_request()
+    second_user_request.email = "other@example.com"
+    second_user_request.cpf = "987.654.321-00"
+    
+    await register_user(client, second_user_request)
+    other_user: User = await user_dao.find_by_email("other@example.com")
 
     professional: Professional = await inject_default_professional(dbsession)
 
