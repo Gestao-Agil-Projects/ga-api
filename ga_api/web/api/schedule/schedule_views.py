@@ -2,9 +2,11 @@ from typing import Any, List
 
 from fastapi import APIRouter, Depends, Query
 
-from ga_api.web.api.availability.response.availability_response import AvailabilityResponse
 from ga_api.db.models.users import User, current_active_user
 from ga_api.services.schedule_service import SchedulingService
+from ga_api.web.api.availability.response.availability_response import (
+    AvailabilityResponse,
+)
 from ga_api.web.api.schedule.request.admin_schedule_request import AdminScheduleRequest
 from ga_api.web.api.schedule.request.patient_schedule_request import (
     PatientScheduleRequest,
@@ -42,7 +44,7 @@ async def get_my_schedules(
     scheduling_service: SchedulingService = Depends(),
     limit: int = Query(default=50, le=100),
     skip: int = Query(default=0, ge=0),
-):
+) -> List[AvailabilityResponse]:
     """
     Retorna os agendamentos do usuário autenticado com paginação.
     """

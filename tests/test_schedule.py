@@ -707,7 +707,7 @@ async def test_get_my_schedules_success(
     """
     availability_dao: AvailabilityDAO = AvailabilityDAO(dbsession)
     user_dao: UserDAO = UserDAO(dbsession)
-    
+
     patient_token = await register_and_login_default_user(client)
     patient: User = await user_dao.find_by_email("mock@mail.com")
 
@@ -748,7 +748,7 @@ async def test_get_my_schedules_success(
 
     data = response.json()
     assert len(data) == 2
-    
+
     # Verifica que todos os agendamentos pertencem ao usuário
     for schedule in data:
         assert schedule["patient_id"] == str(patient.id)
@@ -808,7 +808,7 @@ async def test_get_my_schedules_with_pagination(
     """
     availability_dao: AvailabilityDAO = AvailabilityDAO(dbsession)
     user_dao: UserDAO = UserDAO(dbsession)
-    
+
     patient_token = await register_and_login_default_user(client)
     patient: User = await user_dao.find_by_email("mock@mail.com")
 
@@ -823,11 +823,11 @@ async def test_get_my_schedules_with_pagination(
         availability = AvailabilityFactory.create_availability_model(
             professional_id=professional.id,
             start_time=base_time + timedelta(hours=i),
-            end_time=base_time + timedelta(hours=i+1),
+            end_time=base_time + timedelta(hours=i + 1),
             status=AvailabilityStatus.TAKEN,
         )
         availability.patient_id = patient.id
-        await save_and_expect(availability_dao, availability, i+1)
+        await save_and_expect(availability_dao, availability, i + 1)
 
     url = fastapi_app.url_path_for("get_my_schedules")
 
@@ -876,7 +876,7 @@ async def test_get_my_schedules_only_user_schedules(
     """
     availability_dao: AvailabilityDAO = AvailabilityDAO(dbsession)
     user_dao: UserDAO = UserDAO(dbsession)
-    
+
     # Cria primeiro usuário
     patient1_token = await register_and_login_default_user(client)
     patient1: User = await user_dao.find_by_email("mock@mail.com")
