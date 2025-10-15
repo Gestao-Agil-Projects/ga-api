@@ -42,8 +42,8 @@ async def book_for_patient(
 async def get_my_schedules(
     user: User = Depends(current_active_user),
     scheduling_service: SchedulingService = Depends(),
-    limit: int = Query(default=50, le=100),
-    skip: int = Query(default=0, ge=0),
+    limit: int = 50,
+    offset: int = 0,
 ) -> List[AvailabilityResponse]:
     """
     Retorna os agendamentos do usuário autenticado com paginação.
@@ -51,6 +51,6 @@ async def get_my_schedules(
     availabilities = await scheduling_service.get_user_schedules(
         user=user,
         limit=limit,
-        offset=skip,
+        offset=offset,
     )
     return [AvailabilityResponse.model_validate(a) for a in availabilities]

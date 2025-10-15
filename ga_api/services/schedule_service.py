@@ -88,8 +88,8 @@ class SchedulingService:
     async def get_user_schedules(
         self,
         user: User,
-        limit: int = 50,
-        offset: int = 0,
+        limit: int,
+        offset: int,
     ) -> List[Availability]:
         """
         Retorna os agendamentos (availabilities) do usuário autenticado com paginação.
