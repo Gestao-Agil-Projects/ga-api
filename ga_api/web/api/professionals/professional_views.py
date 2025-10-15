@@ -61,7 +61,6 @@ async def get_all_professionals(
 
 @router.get("/", response_model=List[ProfessionalResponse])
 async def get_all_professionals_public(
-    current_user: Annotated[User, Depends(current_active_user)],
     service: ProfessionalService = Depends(),
     limit: int | None = 50,
     offset: int | None = 0,
