@@ -17,6 +17,7 @@ api_router = APIRouter()
 
 admin_router = APIRouter(prefix="/admin")
 
+
 admin_router.include_router(block.router, prefix="/blocks", tags=["admin", "blocks"])
 
 admin_router.include_router(
