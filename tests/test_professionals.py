@@ -562,18 +562,18 @@ async def test_get_all_professionals_public_as_authenticated_user_returns_ok(
 
 
 @pytest.mark.anyio
-async def test_get_all_professionals_public_unauthenticated_returns_unauthorized(
+async def test_get_all_professionals_public_unauthenticated_returns_ok(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
 ) -> None:
     """
     Testa a tentativa de listagem de profissionais públicos sem autenticação.
-    O resultado esperado é um erro 401 Unauthorized.
+    O resultado esperado é um 200 OK.
     """
     response: Response = await client.get(PUBLIC_PROFESSIONAL_URL)
 
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.anyio

@@ -63,7 +63,6 @@ async def get_all_professionals(
 
 @router.get("/", response_model=List[ProfessionalBlockResponse])
 async def get_all_professionals_public(
-    user: Annotated[User, Depends(current_active_user)],
     service: ProfessionalService = Depends(),
     limit: int | None = 50,
     offset: int | None = 0,
