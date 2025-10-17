@@ -1,3 +1,4 @@
+from typing import List
 from uuid import UUID
 
 from fastapi import Depends, HTTPException
@@ -83,6 +84,21 @@ class SchedulingService:
             "status": AvailabilityStatus.TAKEN,
         }
         return await self.availability_dao.update(availability, update_data)
+
+    async def get_user_schedules(
+        self,
+        user: User,
+        limit: int,
+        offset: int,
+    ) -> List[Availability]:
+        """
+        Retorna os agendamentos (availabilities) do usuário autenticado com paginação.
+        """
+        return await self.availability_dao.find_by_patient_id(
+            user.id,
+            limit=limit,
+            offset=offset,
+        )
 
     async def _get_and_validate_availability(
         self,

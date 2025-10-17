@@ -18,71 +18,12 @@ from tests.factories.availability_factory import AvailabilityFactory
 from tests.factories.user_factory import UserFactory
 from tests.utils import (
     inject_default_professional,
+    login_user,
     login_user_admin,
     register_and_login_default_user,
+    register_user,
     save_and_expect,
 )
-
-
-async def test_book_appointment_by_patient_success(
-    fastapi_app: FastAPI,
-    client: AsyncClient,
-    patient_user: User,
-    dbsession: AsyncSession,
-):
-    """
-    Testa o fluxo de sucesso onde um paciente logado agenda um horário.
-    """
-    availability_dao: AvailabilityDAO = AvailabilityDAO(dbsession)
-    patient_token = await register_and_login_default_user(client)
-
-    professional: Professional = await inject_default_professional(dbsession)
-
-    availability = AvailabilityFactory.create_availability_model(
-        professional_id=professional.id
-    )
-    await save_and_expect(availability_dao, availability, 1)
-
-    request = PatientScheduleRequest(availability_id=availability.id)
-    url = fastapi_app.url_path_for("book_appointment")
-
-    response = await client.post(
-        url,
-        json=request.model_dump(mode="json"),
-        headers={"Authorization": f"Bearer {patient_token}"},
-    )
-
-    assert response.status_code == 200
-
-    data = response.json()
-    assert data["status"] == "taken"
-    assert data["patient_id"] == str(patient_user.id)
-
-    await dbsession.refresh(availability)
-    assert availability.status == "taken"
-    assert availability.patient_id == patient_user.id
-
-
-async def test_book_appointment_by_patient_unauthorized(
-    fastapi_app: FastAPI,
-    client: AsyncClient,
-    patient_user: User,
-    dbsession: AsyncSession,
-):
-    """
-    Testa o fluxo de sucesso onde um paciente logado agenda um horário.
-    """
-
-    request = PatientScheduleRequest(availability_id=uuid.uuid4())
-    url = fastapi_app.url_path_for("book_appointment")
-
-    response = await client.post(
-        url,
-        json=request.model_dump(mode="json"),
-        headers={"Authorization": f"Bearer fooToken"},
-    )
-
-    assert response.status_code == 401
 
 
 # ==================== TESTES DO FLUXO DE PACIENTE ====================
@@ -691,3 +632,173 @@ async def test_invalid_uuid_format(
     )
 
     assert response.status_code == 422  # Validation error
+
+
+# ==================== TESTES GET SCHEDULES ====================
+
+
+async def test_get_my_schedules_success(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    patient_user: User,
+    dbsession: AsyncSession,
+):
+    """
+    Testa que um usuário autenticado pode ver seus próprios agendamentos.
+    """
+    availability_dao: AvailabilityDAO = AvailabilityDAO(dbsession)
+    user_dao: UserDAO = UserDAO(dbsession)
+
+    patient_token = await register_and_login_default_user(client)
+    patient: User = await user_dao.find_by_email("mock@mail.com")
+
+    professional: Professional = await inject_default_professional(dbsession)
+
+    # Cria múltiplos agendamentos para o paciente
+    base_time = datetime.now(timezone.utc).replace(
+        hour=10, minute=0, second=0, microsecond=0
+    ) + timedelta(days=1)
+
+    availability1 = AvailabilityFactory.create_availability_model(
+        professional_id=professional.id,
+        start_time=base_time,
+        end_time=base_time + timedelta(hours=1),
+        status=AvailabilityStatus.TAKEN,
+    )
+    availability1.patient_id = patient.id
+
+    availability2 = AvailabilityFactory.create_availability_model(
+        professional_id=professional.id,
+        start_time=base_time + timedelta(hours=2),
+        end_time=base_time + timedelta(hours=3),
+        status=AvailabilityStatus.TAKEN,
+    )
+    availability2.patient_id = patient.id
+
+    await save_and_expect(availability_dao, availability1, 1)
+    await save_and_expect(availability_dao, availability2, 2)
+
+    url = fastapi_app.url_path_for("get_my_schedules")
+
+    response = await client.get(
+        url,
+        headers={"Authorization": f"Bearer {patient_token}"},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert len(data) == 2
+
+    # Verifica que todos os agendamentos pertencem ao usuário
+    for schedule in data:
+        assert schedule["patient_id"] == str(patient.id)
+        assert schedule["status"] == "taken"
+        assert schedule["professional_id"] == str(professional.id)
+
+
+async def test_get_my_schedules_empty(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+):
+    """
+    Testa que retorna lista vazia quando o usuário não tem agendamentos.
+    """
+    patient_token = await register_and_login_default_user(client)
+
+    url = fastapi_app.url_path_for("get_my_schedules")
+
+    response = await client.get(
+        url,
+        headers={"Authorization": f"Bearer {patient_token}"},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert len(data) == 0
+    assert data == []
+
+
+async def test_get_my_schedules_unauthorized(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+):
+    """
+    Testa que usuário não autenticado não pode acessar agendamentos.
+    """
+    url = fastapi_app.url_path_for("get_my_schedules")
+
+    response = await client.get(
+        url,
+        headers={"Authorization": "Bearer invalid_token"},
+    )
+
+    assert response.status_code == 401
+
+
+async def test_get_my_schedules_only_user_schedules(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    patient_user: User,
+    dbsession: AsyncSession,
+):
+    """
+    Testa que um usuário só vê seus próprios agendamentos, não de outros usuários.
+    """
+    availability_dao: AvailabilityDAO = AvailabilityDAO(dbsession)
+    user_dao: UserDAO = UserDAO(dbsession)
+
+    # Cria primeiro usuário
+    patient1_token = await register_and_login_default_user(client)
+    patient1: User = await user_dao.find_by_email("mock@mail.com")
+
+    # Cria segundo usuário via registro
+    second_user_request = UserFactory.create_minimal_user_request()
+    second_user_request.email = "other@example.com"
+    second_user_request.cpf = "987.654.321-00"
+
+    await register_user(client, second_user_request)
+    other_user: User = await user_dao.find_by_email("other@example.com")
+
+    professional: Professional = await inject_default_professional(dbsession)
+
+    base_time = datetime.now(timezone.utc).replace(
+        hour=10, minute=0, second=0, microsecond=0
+    ) + timedelta(days=1)
+
+    # Agendamento do primeiro usuário
+    availability1 = AvailabilityFactory.create_availability_model(
+        professional_id=professional.id,
+        start_time=base_time,
+        end_time=base_time + timedelta(hours=1),
+        status=AvailabilityStatus.TAKEN,
+    )
+    availability1.patient_id = patient1.id
+
+    # Agendamento do segundo usuário
+    availability2 = AvailabilityFactory.create_availability_model(
+        professional_id=professional.id,
+        start_time=base_time + timedelta(hours=2),
+        end_time=base_time + timedelta(hours=3),
+        status=AvailabilityStatus.TAKEN,
+    )
+    availability2.patient_id = other_user.id
+
+    await save_and_expect(availability_dao, availability1, 1)
+    await save_and_expect(availability_dao, availability2, 2)
+
+    url = fastapi_app.url_path_for("get_my_schedules")
+
+    response = await client.get(
+        url,
+        headers={"Authorization": f"Bearer {patient1_token}"},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert len(data) == 1  # Só deve ver seus próprios agendamentos
+    assert data[0]["patient_id"] == str(patient1.id)
+    assert data[0]["patient_id"] != str(other_user.id)
