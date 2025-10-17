@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "972f8349-db04-4ac1-9fcf-550f70de116a",
-		"name": "ga-api v3",
-		"description": "Caso encontre alguma inconsistência, favor avisar a equipe de backend.",
+		"name": "ga-api v4",
+		"description": "Caso encontre alguma inconsistência, favor avisar a equipe de backend.\n\nv3 -> v4:\n\n- adicionado o endpoint schedule/patient get his schedules",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "37212133"
 	},
@@ -237,12 +237,10 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:8000/api/auth/jwt/logout",
-							"protocol": "http",
+							"raw": "{{api_url}}/api/auth/jwt/logout",
 							"host": [
-								"localhost"
+								"{{api_url}}"
 							],
-							"port": "8000",
 							"path": [
 								"api",
 								"auth",
@@ -485,6 +483,45 @@
 						"description": "Generated from cURL: curl -X 'PATCH' \\\n  'http://localhost:8000/api/users/me' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"password\": \"string\",\n  \"email\": \"user@example.com\",\n  \"is_active\": true,\n  \"is_superuser\": true,\n  \"is_verified\": true,\n  \"birth_date\": \"2025-10-07\",\n  \"phone\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"weekly\"\n}'"
 					},
 					"response": []
+				},
+				{
+					"name": "Admin register patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"cpf\": \"string\",\n  \"birth_date\": \"2025-10-14\",\n  \"phone\": \"string\",\n  \"full_name\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"as_needed\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/admin/auth/register-patient",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"auth",
+								"register-patient"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/admin/auth/register-patient' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"email\": \"user@example.com\",\n  \"cpf\": \"string\",\n  \"birth_date\": \"2025-10-14\",\n  \"phone\": \"string\",\n  \"full_name\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"as_needed\"\n}'"
+					},
+					"response": []
 				}
 			]
 		},
@@ -565,6 +602,41 @@
 							]
 						},
 						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/admin/schedule/' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"availability_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"email\": \"user@example.com\"\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "patient get his schedules",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/schedule/?limit=50&offset=0",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"schedule",
+								""
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/schedule/?limit=50&offset=0' \\\n  -H 'accept: application/json'"
 					},
 					"response": []
 				}
