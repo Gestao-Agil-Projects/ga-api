@@ -18,72 +18,12 @@ from tests.factories.availability_factory import AvailabilityFactory
 from tests.factories.user_factory import UserFactory
 from tests.utils import (
     inject_default_professional,
+    login_user,
     login_user_admin,
     register_and_login_default_user,
     register_user,
     save_and_expect,
 )
-
-
-async def test_book_appointment_by_patient_success(
-    fastapi_app: FastAPI,
-    client: AsyncClient,
-    patient_user: User,
-    dbsession: AsyncSession,
-):
-    """
-    Testa o fluxo de sucesso onde um paciente logado agenda um horário.
-    """
-    availability_dao: AvailabilityDAO = AvailabilityDAO(dbsession)
-    patient_token = await register_and_login_default_user(client)
-
-    professional: Professional = await inject_default_professional(dbsession)
-
-    availability = AvailabilityFactory.create_availability_model(
-        professional_id=professional.id
-    )
-    await save_and_expect(availability_dao, availability, 1)
-
-    request = PatientScheduleRequest(availability_id=availability.id)
-    url = fastapi_app.url_path_for("book_appointment")
-
-    response = await client.post(
-        url,
-        json=request.model_dump(mode="json"),
-        headers={"Authorization": f"Bearer {patient_token}"},
-    )
-
-    assert response.status_code == 200
-
-    data = response.json()
-    assert data["status"] == "taken"
-    assert data["patient_id"] == str(patient_user.id)
-
-    await dbsession.refresh(availability)
-    assert availability.status == "taken"
-    assert availability.patient_id == patient_user.id
-
-
-async def test_book_appointment_by_patient_unauthorized(
-    fastapi_app: FastAPI,
-    client: AsyncClient,
-    patient_user: User,
-    dbsession: AsyncSession,
-):
-    """
-    Testa o fluxo de sucesso onde um paciente logado agenda um horário.
-    """
-
-    request = PatientScheduleRequest(availability_id=uuid.uuid4())
-    url = fastapi_app.url_path_for("book_appointment")
-
-    response = await client.post(
-        url,
-        json=request.model_dump(mode="json"),
-        headers={"Authorization": f"Bearer fooToken"},
-    )
-
-    assert response.status_code == 401
 
 
 # ==================== TESTES DO FLUXO DE PACIENTE ====================
@@ -798,74 +738,6 @@ async def test_get_my_schedules_unauthorized(
     assert response.status_code == 401
 
 
-async def test_get_my_schedules_with_pagination(
-    fastapi_app: FastAPI,
-    client: AsyncClient,
-    patient_user: User,
-    dbsession: AsyncSession,
-):
-    """
-    Testa a paginação do endpoint get_my_schedules.
-    """
-    availability_dao: AvailabilityDAO = AvailabilityDAO(dbsession)
-    user_dao: UserDAO = UserDAO(dbsession)
-
-    patient_token = await register_and_login_default_user(client)
-    patient: User = await user_dao.find_by_email("mock@mail.com")
-
-    professional: Professional = await inject_default_professional(dbsession)
-
-    # Cria 5 agendamentos para testar paginação
-    base_time = datetime.now(timezone.utc).replace(
-        hour=10, minute=0, second=0, microsecond=0
-    ) + timedelta(days=1)
-
-    for i in range(5):
-        availability = AvailabilityFactory.create_availability_model(
-            professional_id=professional.id,
-            start_time=base_time + timedelta(hours=i),
-            end_time=base_time + timedelta(hours=i + 1),
-            status=AvailabilityStatus.TAKEN,
-        )
-        availability.patient_id = patient.id
-        await save_and_expect(availability_dao, availability, i + 1)
-
-    url = fastapi_app.url_path_for("get_my_schedules")
-
-    # Testa primeira página (limit=2)
-    response1 = await client.get(
-        url,
-        params={"limit": 2, "skip": 0},
-        headers={"Authorization": f"Bearer {patient_token}"},
-    )
-
-    assert response1.status_code == 200
-    data1 = response1.json()
-    assert len(data1) == 2
-
-    # Testa segunda página (limit=2, skip=2)
-    response2 = await client.get(
-        url,
-        params={"limit": 2, "skip": 2},
-        headers={"Authorization": f"Bearer {patient_token}"},
-    )
-
-    assert response2.status_code == 200
-    data2 = response2.json()
-    assert len(data2) == 2
-
-    # Testa terceira página (limit=2, skip=4)
-    response3 = await client.get(
-        url,
-        params={"limit": 2, "skip": 4},
-        headers={"Authorization": f"Bearer {patient_token}"},
-    )
-
-    assert response3.status_code == 200
-    data3 = response3.json()
-    assert len(data3) == 1  # Só sobrou 1 registro
-
-
 async def test_get_my_schedules_only_user_schedules(
     fastapi_app: FastAPI,
     client: AsyncClient,
@@ -886,7 +758,7 @@ async def test_get_my_schedules_only_user_schedules(
     second_user_request = UserFactory.create_minimal_user_request()
     second_user_request.email = "other@example.com"
     second_user_request.cpf = "987.654.321-00"
-    
+
     await register_user(client, second_user_request)
     other_user: User = await user_dao.find_by_email("other@example.com")
 

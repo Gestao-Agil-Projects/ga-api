@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 
 from ga_api.db.models.users import User, current_active_user
 from ga_api.services.schedule_service import SchedulingService

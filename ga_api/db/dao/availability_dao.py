@@ -32,7 +32,10 @@ class AvailabilityDAO(AbstractDAO[Availability]):
         return await self.exists(*conditions)
 
     async def find_by_patient_id(
-        self, patient_id: UUID, limit: int = 50, offset: int = 0,
+        self,
+        patient_id: UUID,
+        limit: int = 50,
+        offset: int = 0,
     ) -> List[Availability]:
         result = await self._session.execute(
             select(Availability)
@@ -40,4 +43,4 @@ class AvailabilityDAO(AbstractDAO[Availability]):
             .limit(limit)
             .offset(offset),
         )
-        return result.scalars().all()
+        return list(result.scalars().all())
