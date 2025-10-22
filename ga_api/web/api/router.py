@@ -19,6 +19,7 @@ api_router = APIRouter()
 
 admin_router = APIRouter(prefix="/admin", dependencies=[Depends(admin_required)])
 
+
 admin_router.include_router(
     block.admin_router,
     prefix="/blocks",
@@ -50,7 +51,7 @@ admin_router.include_router(
 
 admin_router.include_router(
     users.admin_router,
-    prefix="/auth",
+    prefix="/users",
     tags=["admin", "auth"],
 )
 

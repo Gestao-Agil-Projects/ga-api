@@ -70,3 +70,12 @@ async def register_user(
 ) -> UserRead:
     user = await service.register_patient_user(request)
     return UserRead.model_validate(user)
+
+
+@admin_router.get("/patients", response_model=list[UserRead])
+async def get_all_patients(
+    service: Annotated[UserService, Depends(get_user_service)],
+    skip: int = 0,
+    limit: int = 100,
+) -> list[UserRead]:
+    return await service.get_all_patients(skip, limit)  # type: ignore

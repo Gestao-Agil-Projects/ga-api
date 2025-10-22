@@ -50,3 +50,6 @@ class UserService:
             ) from e
 
         return await self.user_manager.create(user_create, safe=True)
+
+    async def get_all_patients(self, skip: int, limit: int) -> list[User]:
+        return await self.user_dao.get_all_not_superuser(skip, limit)

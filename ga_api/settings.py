@@ -28,10 +28,10 @@ class Settings(BaseSettings):
     with environment variables.
     """
 
-    mail_username: str = os.getenv("MAIL_USERNAME", "")
+    mail_username: str = os.getenv("MAIL_USERNAME", "calmmindunisenac@gmail.com")
     mail_password: str = os.getenv("MAIL_PASSWORD", "")
-    mail_server: str = os.getenv("MAIL_SERVER", "")
-    mail_port: str = os.getenv("MAIL_PORT", "")
+    mail_server: str = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+    mail_port: str = os.getenv("MAIL_PORT", "587")
 
     host: str = "0.0.0.0"  # noqa: S104
     port: int = int(os.getenv("PORT", 8000))  # noqa: PLW1508
