@@ -28,13 +28,14 @@ class Settings(BaseSettings):
     with environment variables.
     """
 
-    mail_username: str = os.getenv("MAIL_USERNAME", "")
+    mail_username: str = os.getenv("MAIL_USERNAME", "calmmindunisenac@gmail.com")
     mail_password: str = os.getenv("MAIL_PASSWORD", "")
-    mail_server: str = os.getenv("MAIL_SERVER", "")
-    mail_port: str = os.getenv("MAIL_PORT", "")
+    mail_server: str = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+    mail_port: str = os.getenv("MAIL_PORT", "587")
 
-    host: str = "127.0.0.1"
-    port: int = 8000
+    host: str = "0.0.0.0"  # noqa: S104
+    port: int = int(os.getenv("PORT", 8000))  # noqa: PLW1508
+
     # quantity of workers for uvicorn
     workers_count: int = 1
     # Enable uvicorn reloading
@@ -55,11 +56,11 @@ class Settings(BaseSettings):
 
     @property
     def db_url(self) -> URL:
-        """
-        Assemble database URL from settings.
-
-        :return: database URL.
-        """
+        db_url = os.getenv("DATABASE_URL")
+        if db_url:
+            if db_url.startswith("postgres://"):
+                db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+            return URL(db_url)
         return URL.build(
             scheme="postgresql+asyncpg",
             host=self.db_host,

@@ -1,21 +1,33 @@
-from fastapi import APIRouter, Depends
+from typing import Annotated
 
+from fastapi import APIRouter, Depends
+from starlette import status
+
+from ga_api.db.dao.user_dao import UserDAO
 from ga_api.db.models.users import (
     UserCreate,
+    UserManager,
     UserRead,
     UserUpdate,
     api_users,
     auth_jwt,
+    get_user_manager,
 )
-from typing import Annotated, List
+from ga_api.services.mail_service import MailService
+from ga_api.services.user_service import UserService
+from ga_api.web.api.users.request.user_patient_request import UserPatientRequest
 
 
-from ga_api.db.dao.user_dao import UserDAO
-from ga_api.db.models.users import User, UserRead, current_active_user
-from ga_api.enums.user_role import UserRole
-from ga_api.utils.admin_utils import AdminUtils
+async def get_user_service(
+    mail_service: MailService = Depends(),
+    user_manager: UserManager = Depends(get_user_manager),
+    user_dao: UserDAO = Depends(UserDAO),
+) -> UserService:
+    return UserService(mail_service, user_manager, user_dao)
+
 
 router = APIRouter()
+admin_router = APIRouter()
 
 router.include_router(
     api_users.get_register_router(UserRead, UserCreate),
@@ -46,16 +58,24 @@ router.include_router(
     tags=["auth"],
 )
 
-router = APIRouter()
+
+@admin_router.post(
+    "/register-patient",
+    response_model=UserRead,
+    status_code=status.HTTP_201_CREATED,
+)
+async def register_user(
+    request: UserPatientRequest,
+    service: Annotated[UserService, Depends(get_user_service)],
+) -> UserRead:
+    user = await service.register_patient_user(request)
+    return UserRead.model_validate(user)
 
 
-@router.get("/patients", response_model=List[UserRead])
+@admin_router.get("/patients", response_model=list[UserRead])
 async def get_all_patients(
-    admin_user: Annotated[User, Depends(current_active_user)],
-    user_dao: UserDAO = Depends(),
+    service: Annotated[UserService, Depends(get_user_service)],
     skip: int = 0,
     limit: int = 100,
-) -> List[UserRead]:
-
-    AdminUtils.validate_user_is_admin(admin_user)
-    return await user_dao.get_all_by_role(role=UserRole.PATIENT, skip=skip, limit=limit)
+) -> list[UserRead]:
+    return await service.get_all_patients(skip, limit)  # type: ignore

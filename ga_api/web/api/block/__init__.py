@@ -1,3 +1,3 @@
-from ga_api.web.api.block.block_view import router
+from ga_api.web.api.block.block_view import admin_router
 
-__all__ = ["router"]
+__all__ = ["admin_router"]

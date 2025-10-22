@@ -10,7 +10,8 @@ from fastapi_users.authentication import (
     JWTStrategy,
 )
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
-from sqlalchemy import TIMESTAMP, Date, String, func
+from fastapi_users.exceptions import UserAlreadyExists
+from sqlalchemy import TIMESTAMP, Boolean, Date, String, func
 from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,6 +36,11 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     full_name: Mapped[str] = mapped_column(String(200), nullable=False)
     image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     bio: Mapped[str] = mapped_column(String(200), nullable=True)
+    is_first_access: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+    )
 
     frequency: Mapped[ConsultationFrequency] = mapped_column(
         SQLAlchemyEnum(ConsultationFrequency),
@@ -68,6 +74,7 @@ class UserRead(schemas.BaseUser[uuid.UUID]):
     bio: Optional[str] = None
     frequency: ConsultationFrequency
     role: UserRole
+    is_first_access: bool
 
 
 class UserCreate(schemas.BaseUserCreate):
@@ -77,6 +84,7 @@ class UserCreate(schemas.BaseUserCreate):
     full_name: str
     image_url: Optional[str] = None
     bio: Optional[str] = None
+    is_first_access: Optional[bool] = False
     frequency: ConsultationFrequency = ConsultationFrequency.AS_NEEDED
 
 
@@ -102,7 +110,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         try:
             return await super().create(user_create, safe, request)
 
-        except IntegrityError as e:
+        except (IntegrityError, UserAlreadyExists) as e:
             await session.rollback()
             detail: str = create_generic_integrity_error_message(e)
             raise HTTPException(

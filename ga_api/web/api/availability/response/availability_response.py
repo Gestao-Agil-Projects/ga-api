@@ -8,12 +8,10 @@ from ga_api.enums.availability_status import AvailabilityStatus
 
 
 class AvailabilityResponse(BaseModel):
-
     id: UUID
     status: AvailabilityStatus
     start_time: datetime
     end_time: datetime
-    created_at: datetime
     professional_id: UUID
     patient_id: Optional[UUID] = None
 

@@ -1,7 +1,6 @@
 # ga_api/services/professional_service.py
 
 import uuid
-from datetime import datetime
 from typing import List
 
 from fastapi import Depends, HTTPException, status
@@ -19,6 +18,9 @@ from ga_api.web.api.professionals.request.professional_create_request import (
 from ga_api.web.api.professionals.request.professional_update_request import (
     ProfessionalUpdateRequest,
 )
+from ga_api.web.api.professionals.response.professional_block_response import (
+    ProfessionalBlockResponse,
+)
 
 
 class ProfessionalService:
@@ -32,7 +34,6 @@ class ProfessionalService:
         request: ProfessionalCreateRequest,
         admin_user: User,
     ) -> Professional:
-        AdminUtils.validate_user_is_admin(admin_user)
 
         new_professional: Professional = Professional(
             full_name=request.full_name,
@@ -67,7 +68,6 @@ class ProfessionalService:
         request: ProfessionalUpdateRequest,
         admin_user: User,
     ) -> Professional:
-        AdminUtils.validate_user_is_admin(admin_user)
         professional = await self.professional_dao.find_by_id(
             professional_id,
         )
@@ -102,29 +102,37 @@ class ProfessionalService:
                     request.specialities,
                 )
 
-        professional.updated_at = datetime.now()
-        professional.updated_by_admin_id = admin_user.id
+        AdminUtils.populate_admin_data(professional, admin_user, update_only=True)
         return await self.professional_dao.save(professional)
 
     async def get_all_professionals_admin(
         self,
-        admin_user: User,
         limit: int,
         offset: int,
-    ) -> List[Professional]:
-        AdminUtils.validate_user_is_admin(admin_user)
-        return await self.professional_dao.find_all_with_specialities(limit, offset)
+    ) -> List[ProfessionalBlockResponse]:
+        professionals_and_blocked_list = (
+            await self.professional_dao.find_all_with_specialities(limit, offset)
+        )
+
+        return [
+            ProfessionalBlockResponse(professional=prof, is_blocked=is_blocked)  # type: ignore
+            for prof, is_blocked in professionals_and_blocked_list
+        ]
 
     async def get_all_professionals(
         self,
         limit: int,
         offset: int,
-    ) -> List[Professional]:
-        """
-        Retorna apenas profissionais habilitados para usuários não-admin.
-        """
-        return await self.professional_dao.find_all_with_specialities(
-            limit,
-            offset,
-            only_enabled=True,
+    ) -> List[ProfessionalBlockResponse]:
+        professionals_and_blocked_list = (
+            await self.professional_dao.find_all_with_specialities(
+                limit,
+                offset,
+                only_enabled=True,
+            )
         )
+
+        return [
+            ProfessionalBlockResponse(professional=prof, is_blocked=is_blocked)  # type: ignore
+            for prof, is_blocked in professionals_and_blocked_list
+        ]

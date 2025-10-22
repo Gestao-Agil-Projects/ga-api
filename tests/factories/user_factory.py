@@ -1,4 +1,5 @@
 from datetime import date
+from random import randint
 
 from ga_api.db.models.users import UserCreate
 from ga_api.enums.consultation_frequency import ConsultationFrequency
@@ -27,4 +28,16 @@ class UserFactory:
             password="password123",
             full_name="Minimal User",
             cpf="111.222.333-44",
+        )
+
+    @staticmethod
+    def create_random_user_request():
+        n = randint(1000, 9999)
+        return UserCreate(
+            email=f"user{n}@example.com",
+            password="password123",
+            full_name=f"User {n}",
+            cpf=f"{randint(100, 999)}.{randint(100, 999)}.{randint(100, 999)}-{randint(10, 99)}",
+            birth_date=date(randint(1970, 2005), randint(1, 12), randint(1, 28)),
+            frequency=ConsultationFrequency.AS_NEEDED,
         )

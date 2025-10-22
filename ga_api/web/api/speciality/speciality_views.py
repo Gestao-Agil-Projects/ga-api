@@ -21,14 +21,16 @@ def get_speciality_service(
 
 @admin_router.get("/", response_model=List[SpecialityResponse])
 async def get_speciality_models(
-    user: Annotated[Any, Depends(current_active_user)],
     speciality_service: Annotated[SpecialityService, Depends(get_speciality_service)],
     speciality_id: uuid.UUID | None = None,
     limit: int = 10,
     offset: int = 0,
 ) -> List[SpecialityResponse]:
-
-    return await speciality_service.get_speciality_models(limit, offset, speciality_id)  # type: ignore
+    return await speciality_service.get_speciality_models(  # type: ignore
+        limit,
+        offset,
+        speciality_id,
+    )
 
 
 @admin_router.put("/", status_code=200)
@@ -44,12 +46,11 @@ async def update_speciality_model(
 
 @admin_router.post("/", status_code=201)
 async def create_speciality(
-    user: Annotated[Any, Depends(current_active_user)],
     request: SpecialityRequest,
     speciality_service: Annotated[SpecialityService, Depends(get_speciality_service)],
 ) -> SpecialityResponse:
 
-    return await speciality_service.create_speciality(user, request)  # type: ignore
+    return await speciality_service.create_speciality(request)  # type: ignore
 
 
 # @admin_router.delete("/", status_code=204)

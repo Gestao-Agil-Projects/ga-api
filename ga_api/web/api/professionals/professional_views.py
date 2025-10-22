@@ -11,6 +11,9 @@ from ga_api.web.api.professionals.request.professional_create_request import (
 from ga_api.web.api.professionals.request.professional_update_request import (
     ProfessionalUpdateRequest,
 )
+from ga_api.web.api.professionals.response.professional_block_response import (
+    ProfessionalBlockResponse,
+)
 from ga_api.web.api.professionals.response.professional_create_response import (
     ProfessionalResponse,
 )
@@ -49,20 +52,19 @@ async def update_professional(
     )
 
 
-@admin_router.get("/", response_model=List[ProfessionalResponse])
+@admin_router.get("/", response_model=List[ProfessionalBlockResponse])
 async def get_all_professionals(
-    admin_user: Annotated[User, Depends(current_active_user)],
     service: ProfessionalService = Depends(),
     limit: int | None = 50,
     offset: int | None = 0,
-) -> List[ProfessionalResponse]:
-    return await service.get_all_professionals_admin(admin_user, limit, offset)  # type: ignore
+) -> List[ProfessionalBlockResponse]:
+    return await service.get_all_professionals_admin(limit, offset)  # type: ignore
 
 
-@router.get("/", response_model=List[ProfessionalResponse])
+@router.get("/", response_model=List[ProfessionalBlockResponse])
 async def get_all_professionals_public(
     service: ProfessionalService = Depends(),
     limit: int | None = 50,
     offset: int | None = 0,
-) -> List[ProfessionalResponse]:
+) -> List[ProfessionalBlockResponse]:
     return await service.get_all_professionals(limit, offset)  # type: ignore

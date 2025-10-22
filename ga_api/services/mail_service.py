@@ -24,3 +24,16 @@ class MailService:
             )
         )
         await self.fm.send_message(template_message)
+
+    async def send_email_first_access(
+        self,
+        request: MailRequest,
+        password: str,
+    ) -> None:
+        template_message: MessageSchema = (
+            TemplateFactory.create_first_access_password_template(
+                request,
+                password,
+            )
+        )
+        await self.fm.send_message(template_message)

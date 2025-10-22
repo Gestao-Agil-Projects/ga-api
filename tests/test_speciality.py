@@ -265,7 +265,7 @@ async def test_getting_by_id_not_found(
     client: AsyncClient,
 ) -> None:
     """Tests speciality retrieval by id when it does not exist."""
-    token = await register_and_login_default_user(client)
+    token = await login_user_admin(client)
     url = fastapi_app.url_path_for("get_speciality_models")
 
     response = await client.get(

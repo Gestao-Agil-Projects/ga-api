@@ -114,7 +114,7 @@ async def test_create_block_with_invalid_professional_id(
         "/api/admin/blocks/", json=request.model_dump(mode="json"), headers=headers
     )
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 @pytest.mark.anyio
@@ -280,3 +280,113 @@ async def test_delete_block_not_found(
     response = await client.delete(f"/api/admin/blocks/{uuid4()}", headers=headers)
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+@pytest.mark.anyio
+async def test_get_professional_blocks_success(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    block_dao = BlockDAO(dbsession)
+    token = await login_user_admin(client)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    professional = await inject_default_professional(dbsession)
+
+    # Criar um bloqueio
+    request = BlockCreateRequest(
+        professional_id=professional.id,
+        start_time=datetime.now(),
+        end_time=datetime.now() + timedelta(days=1),
+        reason="bloqueio teste",
+    )
+    await client.post(
+        "/api/admin/blocks/", json=request.model_dump(mode="json"), headers=headers
+    )
+
+    response = await client.get(f"/api/admin/blocks/{professional.id}", headers=headers)
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) == 1
+    assert data[0]["professional_id"] == str(professional.id)
+
+
+@pytest.mark.anyio
+async def test_get_professional_blocks_empty_list(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    token = await login_user_admin(client)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    professional = await inject_default_professional(dbsession)
+
+    response = await client.get(f"/api/admin/blocks/{professional.id}", headers=headers)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == []
+
+
+@pytest.mark.anyio
+async def test_get_professional_blocks_invalid_professional(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    token = await login_user_admin(client)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = await client.get(f"/api/admin/blocks/{uuid4()}", headers=headers)
+
+    # O DAO retorna [], então deve ser 200 com lista vazia
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == []
+
+
+@pytest.mark.anyio
+async def test_get_professional_blocks_with_patient_user(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    token = await register_and_login_default_user(client)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    professional = await inject_default_professional(dbsession)
+
+    response = await client.get(f"/api/admin/blocks/{professional.id}", headers=headers)
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.anyio
+async def test_get_professional_blocks_unauthorized(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    headers = {"Authorization": f"Bearer foo_token"}
+
+    professional = await inject_default_professional(dbsession)
+
+    response = await client.get(f"/api/admin/blocks/{professional.id}", headers=headers)
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.anyio
+async def test_get_professional_blocks_invalid_uuid_format(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    token = await login_user_admin(client)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = await client.get("/api/admin/blocks/invalid_uuid", headers=headers)
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY

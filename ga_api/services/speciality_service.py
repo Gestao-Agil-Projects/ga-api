@@ -16,10 +16,8 @@ class SpecialityService:
 
     async def create_speciality(
         self,
-        user: User,
         request: SpecialityRequest,
     ) -> Speciality:
-        AdminUtils.validate_user_is_admin(user)
         request.title = request.title.lower()
         await self._validate_title(request.title)
 
@@ -50,7 +48,6 @@ class SpecialityService:
         speciality_id: UUID,
         request: SpecialityRequest,
     ) -> Speciality:
-        AdminUtils.validate_user_is_admin(user)
         speciality: Optional[Speciality] = await self.speciality_dao.find_by_id(
             speciality_id,
         )

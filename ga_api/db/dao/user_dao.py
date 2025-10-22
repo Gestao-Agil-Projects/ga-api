@@ -1,11 +1,10 @@
 from fastapi import Depends
-from sqlalchemy import select
+from sqlalchemy import not_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ga_api.db.dao.abstract_dao import AbstractDAO
 from ga_api.db.dependencies import get_db_session
 from ga_api.db.models.users import User
-from ga_api.enums.user_role import UserRole
 
 
 class UserDAO(AbstractDAO[User]):
@@ -17,14 +16,12 @@ class UserDAO(AbstractDAO[User]):
             select(User).where(User.email == email),  # type: ignore
         )
         return result.scalar_one_or_none()
-        
-    async def get_all_by_role(
-        self, role: UserRole, skip: int = 0, limit: int = 100
-    ) -> List[User]:
-        result = await self._session.execute(
-            select(self._AbstractDAO__model)  # type: ignore
-            .where(self._AbstractDAO__model.role == role)  # type: ignore
-            .offset(skip)
-            .limit(limit)
-        )
-        return result.scalars().all()
+
+    async def get_all_not_superuser(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> list[User]:
+        query = select(User).where(not_(User.is_superuser)).offset(skip).limit(limit)  # type: ignore
+        result = await self._session.execute(query)
+        return list(result.scalars().all())

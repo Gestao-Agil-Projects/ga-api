@@ -1,160 +1,101 @@
 {
 	"info": {
-		"_postman_id": "60819c93-98d8-44ed-a7e6-fdf430c0fe91",
-		"name": "ga-api",
+		"_postman_id": "972f8349-db04-4ac1-9fcf-550f70de116a",
+		"name": "ga-api v4",
+		"description": "Caso encontre alguma inconsistência, favor avisar a equipe de backend.\n\nv3 -> v4:\n\n- adicionado o endpoint schedule/patient get his schedules",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "37212133"
 	},
 	"item": [
 		{
-			"name": "register",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "accept",
-						"value": "application/json"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"string\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false,\n  \"full_name\": \"string\",\n  \"cpf\": \"12345678901\",\n  \"birth_date\": \"2025-09-23\",\n  \"phone\": \"string\",\n  \"frequency\": \"as_needed\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8000/api/auth/register",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8000",
-					"path": [
-						"api",
-						"auth",
-						"register"
-					]
-				},
-				"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/auth/register' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"email\": \"user@example.com\",\n  \"password\": \"string\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false,\n  \"full_name\": \"string\",\n  \"birth_date\": \"2025-09-23\",\n  \"phone\": \"string\",\n  \"frequency\": \"as_needed\",\n  \"role\": \"patient\"\n}'"
-			},
-			"response": []
-		},
-		{
-			"name": "login",
-			"event": [
+			"name": "auth",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Response status code is 200\", function () {",
-							"    pm.expect(pm.response.code).to.equal(200);",
-							"});",
-							"",
-							"",
-							"pm.test(\"Response has required fields\", function () {",
-							"    const responseData = pm.response.json();",
-							"    ",
-							"    pm.expect(responseData).to.be.an('object');",
-							"    pm.expect(responseData).to.have.all.keys('access_token', 'token_type');",
-							"});",
-							"",
-							"",
-							"pm.test(\"Access token is a non-empty string\", function () {",
-							"    const responseData = pm.response.json();",
-							"    ",
-							"    pm.expect(responseData).to.be.an('object');",
-							"    pm.expect(responseData.access_token).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Access token should not be empty\");",
-							"});",
-							"",
-							"",
-							"pm.test(\"Token type should be 'Bearer'\", function () {",
-							"    const responseData = pm.response.json();",
-							"    ",
-							"    pm.expect(responseData).to.be.an('object');",
-							"    pm.expect(responseData.token_type).to.exist.and.to.equal(\"bearer\");",
-							"});",
-							"",
-							"let response = pm.response.json()",
-							"pm.collectionVariables.set(\"auth_token\", response.access_token)"
+					"name": "register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
 						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "accept",
-						"value": "application/json"
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"joao@gmail.com\",\n  \"password\": \"123456\",\n  \"full_name\": \"João Silva Brasil\",\n  \"cpf\": \"12345678901\",\n  \"birth_date\": \"1999-02-01\",\n  \"phone\": \"51912345678\",\n  \"frequency\": \"as_needed\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/auth/register",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/auth/register' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"email\": \"user@example.com\",\n  \"password\": \"string\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false,\n  \"full_name\": \"string\",\n  \"birth_date\": \"2025-09-23\",\n  \"phone\": \"string\",\n  \"frequency\": \"as_needed\",\n  \"role\": \"patient\"\n}'"
 					},
-					{
-						"key": "Content-Type",
-						"value": "application/x-www-form-urlencoded"
-					}
-				],
-				"body": {
-					"mode": "urlencoded",
-					"urlencoded": [
-						{
-							"key": "grant_type",
-							"value": "password",
-							"type": "text"
-						},
-						{
-							"key": "username",
-							"value": "user@example.com",
-							"type": "text"
-						},
-						{
-							"key": "password",
-							"value": "string",
-							"type": "text"
-						},
-						{
-							"key": "scope",
-							"value": "",
-							"type": "text"
-						},
-						{
-							"key": "client_id",
-							"value": "string",
-							"type": "text"
-						},
-						{
-							"key": "client_secret",
-							"value": "********",
-							"type": "text"
-						}
-					]
+					"response": []
 				},
-				"url": {
-					"raw": "{{api_url}}/api/auth/jwt/login",
-					"host": [
-						"{{api_url}}"
-					],
-					"path": [
-						"api",
-						"auth",
-						"jwt",
-						"login"
-					]
-				},
-				"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/auth/jwt/login' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/x-www-form-urlencoded' \\\n  -d 'grant_type=password&username=user%40mail.com&password=pass123&scope=&client_id=string&client_secret=********'"
-			},
-			"response": [
 				{
-					"name": "login admin",
-					"originalRequest": {
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has required fields\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData).to.have.all.keys('access_token', 'token_type');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Access token is a non-empty string\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.access_token).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Access token should not be empty\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Token type should be 'Bearer'\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.token_type).to.exist.and.to.equal(\"bearer\");",
+									"});",
+									"",
+									"let response = pm.response.json()",
+									"pm.collectionVariables.set(\"auth_token\", response.access_token)"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -176,12 +117,12 @@
 								},
 								{
 									"key": "username",
-									"value": "admin@admin.com",
+									"value": "joao@gmail.com",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "admin",
+									"value": "123456",
 									"type": "text"
 								},
 								{
@@ -212,105 +153,922 @@
 								"jwt",
 								"login"
 							]
-						}
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/auth/jwt/login' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/x-www-form-urlencoded' \\\n  -d 'grant_type=password&username=user%40mail.com&password=pass123&scope=&client_id=string&client_secret=********'"
 					},
-					"_postman_previewlanguage": null,
-					"header": null,
-					"cookie": [],
-					"body": null
+					"response": [
+						{
+							"name": "login admin",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "grant_type",
+											"value": "password",
+											"type": "text"
+										},
+										{
+											"key": "username",
+											"value": "admin@admin.com",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "admin",
+											"type": "text"
+										},
+										{
+											"key": "scope",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "client_id",
+											"value": "string",
+											"type": "text"
+										},
+										{
+											"key": "client_secret",
+											"value": "********",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_url}}/api/auth/jwt/login",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"jwt",
+										"login"
+									]
+								}
+							},
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/auth/jwt/logout",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"jwt",
+								"logout"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/auth/jwt/logout' \\\n  -H 'accept: application/json' \\\n  -d ''"
+					},
+					"response": []
 				}
 			]
 		},
 		{
-			"name": "get my user data",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "accept",
-						"value": "application/json"
-					}
-				],
-				"url": {
-					"raw": "{{api_url}}/api/users/me",
-					"host": [
-						"{{api_url}}"
-					],
-					"path": [
-						"api",
-						"users",
-						"me"
-					]
-				},
-				"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/users/me' \\\n  -H 'accept: application/json'"
-			},
-			"response": []
-		},
-		{
-			"name": "logout",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "accept",
-						"value": "application/json"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:8000/api/auth/jwt/logout",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8000",
-					"path": [
-						"api",
-						"auth",
-						"jwt",
-						"logout"
-					]
-				},
-				"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/auth/jwt/logout' \\\n  -H 'accept: application/json' \\\n  -d ''"
-			},
-			"response": []
-		},
-		{
-			"name": "update user",
-			"request": {
-				"method": "PATCH",
-				"header": [
-					{
-						"key": "accept",
-						"value": "application/json"
+			"name": "speciality",
+			"item": [
+				{
+					"name": "get speciality",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/admin/speciality/?limit=10&offset=0",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"speciality",
+								""
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/admin/speciality/?limit=10&offset=0' \\\n  -H 'accept: application/json'"
 					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"password\": \"lorenzo\",\n  \"email\": \"lorenzo@example.com\",\n  \"is_active\": true,\n  \"is_superuser\": true,\n  \"is_verified\": true,\n  \"birth_date\": \"2025-09-29\",\n  \"phone\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"weekly\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
+					"response": []
 				},
-				"url": {
-					"raw": "{{api_url}}/api/users/d0f2610f-dcfb-42a6-97a4-3e97df4c6236",
-					"host": [
-						"{{api_url}}"
-					],
-					"path": [
-						"api",
-						"users",
-						"d0f2610f-dcfb-42a6-97a4-3e97df4c6236"
-					]
+				{
+					"name": "create speciality",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"string\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/admin/speciality/",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"speciality",
+								""
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/admin/speciality/' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"title\": \"string\"\n}'"
+					},
+					"response": []
 				},
-				"description": "Generated from cURL: curl -X 'PATCH' \\\n  'http://localhost:8000/api/users/d0f2610f-dcfb-42a6-97a4-3e97df4c6236' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"password\": \"string\",\n  \"email\": \"user@example.com\",\n  \"is_active\": true,\n  \"is_superuser\": true,\n  \"is_verified\": true,\n  \"birth_date\": \"2025-09-29\",\n  \"phone\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"weekly\"\n}'"
-			},
-			"response": []
+				{
+					"name": "update speciality",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"string\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/admin/speciality/?speciality_id=280603d7-8557-4bf3-8dc0-8d68bd8708a6",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"speciality",
+								""
+							],
+							"query": [
+								{
+									"key": "speciality_id",
+									"value": "280603d7-8557-4bf3-8dc0-8d68bd8708a6"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X 'PUT' \\\n  'http://localhost:8000/api/admin/speciality/?speciality_id=280603d7-8557-4bf3-8dc0-8d68bd8708a6' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"title\": \"string\"\n}'"
+					},
+					"response": []
+				}
+			],
+			"description": "endpoints para gerenciar especialidades."
+		},
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "get my user data",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/users/me",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"me"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/users/me' \\\n  -H 'accept: application/json'"
+					},
+					"response": []
+				},
+				{
+					"name": "admin update users",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"joao123\",\n  \"email\": \"joao@gmail.com\",\n  \"is_active\": true,\n  \"is_superuser\": true,\n  \"is_verified\": true,\n  \"birth_date\": \"2025-09-29\",\n  \"phone\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"weekly\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/users/d0f2610f-dcfb-42a6-97a4-3e97df4c6236",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"d0f2610f-dcfb-42a6-97a4-3e97df4c6236"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'PATCH' \\\n  'http://localhost:8000/api/users/d0f2610f-dcfb-42a6-97a4-3e97df4c6236' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"password\": \"string\",\n  \"email\": \"user@example.com\",\n  \"is_active\": true,\n  \"is_superuser\": true,\n  \"is_verified\": true,\n  \"birth_date\": \"2025-09-29\",\n  \"phone\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"weekly\"\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "update my user",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"string\",\n  \"email\": \"user@example.com\",\n  \"is_active\": true,\n  \"is_superuser\": true,\n  \"is_verified\": true,\n  \"birth_date\": \"2025-10-07\",\n  \"phone\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"weekly\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/users/me",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"me"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'PATCH' \\\n  'http://localhost:8000/api/users/me' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"password\": \"string\",\n  \"email\": \"user@example.com\",\n  \"is_active\": true,\n  \"is_superuser\": true,\n  \"is_verified\": true,\n  \"birth_date\": \"2025-10-07\",\n  \"phone\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"weekly\"\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "Admin register patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"cpf\": \"string\",\n  \"birth_date\": \"2025-10-14\",\n  \"phone\": \"string\",\n  \"full_name\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"as_needed\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/admin/auth/register-patient",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"auth",
+								"register-patient"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/admin/auth/register-patient' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"email\": \"user@example.com\",\n  \"cpf\": \"string\",\n  \"birth_date\": \"2025-10-14\",\n  \"phone\": \"string\",\n  \"full_name\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"as_needed\"\n}'"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "schedule",
+			"item": [
+				{
+					"name": "patient schedule",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"availability_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/schedule/",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"schedule",
+								""
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/schedule/' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"availability_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "admin schedule for patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"availability_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"email\": \"user@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/admin/schedule/",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"schedule",
+								""
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/admin/schedule/' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"availability_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"email\": \"user@example.com\"\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "patient get his schedules",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/schedule/?limit=50&offset=0",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"schedule",
+								""
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/schedule/?limit=50&offset=0' \\\n  -H 'accept: application/json'"
+					},
+					"response": []
+				}
+			],
+			"description": "agendamentos de consultas em horários disponiveis."
+		},
+		{
+			"name": "availability",
+			"item": [
+				{
+					"name": "create availability",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"start_time\": \"2025-10-07T23:30:13.609Z\",\n  \"end_time\": \"2025-10-07T23:30:13.609Z\",\n  \"professional_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/admin/availability/",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"availability",
+								""
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/admin/availability/' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"start_time\": \"2025-10-07T23:30:13.609Z\",\n  \"end_time\": \"2025-10-07T23:30:13.609Z\",\n  \"professional_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "update availability",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"start_time\": \"2025-10-07T23:31:13.393Z\",\n  \"end_time\": \"2025-10-07T23:31:13.393Z\",\n  \"status\": \"available\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/admin/availability/f09a1a77-6dcf-4c05-9e9f-6a7e03a7d29a",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"availability",
+								"f09a1a77-6dcf-4c05-9e9f-6a7e03a7d29a"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'PUT' \\\n  'http://localhost:8000/api/admin/availability/f09a1a77-6dcf-4c05-9e9f-6a7e03a7d29a' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"start_time\": \"2025-10-07T23:31:13.393Z\",\n  \"end_time\": \"2025-10-07T23:31:13.393Z\",\n  \"status\": \"available\"\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "admin get availabilities from professional",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NzM2MDZhZi01MDdkLTRhY2UtOTUxMS02ODdlNWI1MDRlOGYiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl19.HbXpdpEbsXUlbLWGkjnb-aNbGdzJnq4HDkB_H9XlxEY"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/admin/availability/?professional_id=e37f218f-80a6-466a-bb09-26f750f0a625&limit=50&offset=0",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"availability",
+								""
+							],
+							"query": [
+								{
+									"key": "professional_id",
+									"value": "e37f218f-80a6-466a-bb09-26f750f0a625"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/admin/availability/?professional_id=e37f218f-80a6-466a-bb09-26f750f0a625&limit=50&offset=0' \\\n  -H 'accept: application/json' \\\n  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NzM2MDZhZi01MDdkLTRhY2UtOTUxMS02ODdlNWI1MDRlOGYiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl19.HbXpdpEbsXUlbLWGkjnb-aNbGdzJnq4HDkB_H9XlxEY'"
+					},
+					"response": []
+				},
+				{
+					"name": "patient get available availabilities from professional",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NzM2MDZhZi01MDdkLTRhY2UtOTUxMS02ODdlNWI1MDRlOGYiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl19.HbXpdpEbsXUlbLWGkjnb-aNbGdzJnq4HDkB_H9XlxEY"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/availability/?professional_id=e37f218f-80a6-466a-bb09-26f750f0a625&limit=50&offset=0",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"availability",
+								""
+							],
+							"query": [
+								{
+									"key": "professional_id",
+									"value": "e37f218f-80a6-466a-bb09-26f750f0a625"
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/availability/?professional_id=e37f218f-80a6-466a-bb09-26f750f0a625&limit=50&offset=0' \\\n  -H 'accept: application/json' \\\n  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NzM2MDZhZi01MDdkLTRhY2UtOTUxMS02ODdlNWI1MDRlOGYiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl19.HbXpdpEbsXUlbLWGkjnb-aNbGdzJnq4HDkB_H9XlxEY'"
+					},
+					"response": []
+				}
+			],
+			"description": "gerenciar horários disponíveis."
+		},
+		{
+			"name": "professionals",
+			"item": [
+				{
+					"name": "admin get all professionals",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/admin/professionals/?limit=50&offset=0",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"professionals",
+								""
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/admin/professionals/?limit=50&offset=0' \\\n  -H 'accept: application/json'"
+					},
+					"response": []
+				},
+				{
+					"name": "update professional",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"full_name\": \"string\",\n  \"bio\": \"string\",\n  \"is_enabled\": true,\n  \"specialities\": [\n    \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/admin/professionals/280603d7-8557-4bf3-8dc0-8d68bd8708a6",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"professionals",
+								"280603d7-8557-4bf3-8dc0-8d68bd8708a6"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'PUT' \\\n  'http://localhost:8000/api/admin/professionals/280603d7-8557-4bf3-8dc0-8d68bd8708a6' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"full_name\": \"string\",\n  \"bio\": \"string\",\n  \"is_enabled\": true,\n  \"specialities\": [\n    \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n  ]\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "patient get all professionals",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/professionals/?limit=50&offset=0",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"professionals",
+								""
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/professionals/?limit=50&offset=0' \\\n  -H 'accept: application/json'"
+					},
+					"response": []
+				},
+				{
+					"name": "create professional",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"full_name\": \"João da Silva\",\n  \"bio\": \"Profissional com 10 anos de experiência\",\n  \"phone\": \"51912345678\",\n  \"email\": \"jose.silva@gmail.com\",\n  \"is_enabled\": true,\n  \"specialities\": [\"8ad5c300-5a01-4f93-be32-ca4e76f425e6\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/admin/professionals/",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"professionals",
+								""
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/admin/professionals/' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"full_name\": \"string\",\n  \"bio\": \"string\",\n  \"phone\": \"string\",\n  \"email\": \"user@example.com\",\n  \"is_enabled\": true,\n  \"specialities\": []\n}'"
+					},
+					"response": []
+				}
+			],
+			"description": "gerenciar profissionais."
+		},
+		{
+			"name": "blocks",
+			"item": [
+				{
+					"name": "Create block",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"professional_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"start_time\": \"2025-10-07T22:16:08.421Z\",\n  \"end_time\": \"2025-10-07T22:16:08.421Z\",\n  \"reason\": \"string\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/api/admin/blocks/",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"blocks",
+								""
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8000/api/admin/blocks/' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"professional_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"start_time\": \"2025-10-07T22:16:08.421Z\",\n  \"end_time\": \"2025-10-07T22:16:08.421Z\",\n  \"reason\": \"string\"\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete block",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/admin/blocks/280603d7-8557-4bf3-8dc0-8d68bd8708a6",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"blocks",
+								"280603d7-8557-4bf3-8dc0-8d68bd8708a6"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'DELETE' \\\n  'http://localhost:8000/api/admin/blocks/280603d7-8557-4bf3-8dc0-8d68bd8708a6' \\\n  -H 'accept: */*'"
+					},
+					"response": []
+				},
+				{
+					"name": "Get blocks from professional",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NzM2MDZhZi01MDdkLTRhY2UtOTUxMS02ODdlNWI1MDRlOGYiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl19.HbXpdpEbsXUlbLWGkjnb-aNbGdzJnq4HDkB_H9XlxEY"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/admin/blocks/e37f218f-80a6-466a-bb09-26f750f0a625",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"blocks",
+								"e37f218f-80a6-466a-bb09-26f750f0a625"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/admin/blocks/e37f218f-80a6-466a-bb09-26f750f0a625' \\\n  -H 'accept: application/json' \\\n  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NzM2MDZhZi01MDdkLTRhY2UtOTUxMS02ODdlNWI1MDRlOGYiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl19.HbXpdpEbsXUlbLWGkjnb-aNbGdzJnq4HDkB_H9XlxEY'"
+					},
+					"response": []
+				}
+			],
+			"description": "para adicionar ou remover bloqueios temporários sobre um profissional."
 		}
 	],
 	"auth": {
