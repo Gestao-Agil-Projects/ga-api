@@ -75,6 +75,7 @@ class UserRead(schemas.BaseUser[uuid.UUID]):
     frequency: ConsultationFrequency
     role: UserRole
     is_first_access: bool
+    created_at: datetime
 
 
 class UserCreate(schemas.BaseUserCreate):
