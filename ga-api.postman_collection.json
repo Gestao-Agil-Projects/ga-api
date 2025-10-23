@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "972f8349-db04-4ac1-9fcf-550f70de116a",
-		"name": "ga-api v5",
-		"description": "Caso encontre alguma inconsistência, favor avisar a equipe de backend.\n\nv4 -> v5:\n\n- adicionado o endpoint admin get all patients",
+		"name": "ga-api v6",
+		"description": "Caso encontre alguma inconsistência, favor avisar a equipe de backend.\n\nv4 -> v5:\n\n- adicionado o endpoint admin get all users\n    \n- alterado o update my user: agora permite alterar o campo **is_first_access** _**boolean**_",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "37212133"
 	},
@@ -462,7 +462,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"password\": \"string\",\n  \"email\": \"user@example.com\",\n  \"is_active\": true,\n  \"is_superuser\": true,\n  \"is_verified\": true,\n  \"birth_date\": \"2025-10-07\",\n  \"phone\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"weekly\"\n}",
+							"raw": "{\n  \"password\": \"string\",\n  \"email\": \"user@example.com\",\n  \"is_active\": true,\n  \"is_superuser\": true,\n  \"is_verified\": true,\n  \"birth_date\": \"2025-10-07\",\n  \"phone\": \"string\",\n  \"image_url\": \"string\",\n  \"bio\": \"string\",\n  \"frequency\": \"weekly\",\n  \"is_first_access\": false\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -508,14 +508,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{api_url}}/api/admin/auth/register-patient",
+							"raw": "{{api_url}}/api/admin/users/register-patient",
 							"host": [
 								"{{api_url}}"
 							],
 							"path": [
 								"api",
 								"admin",
-								"auth",
+								"users",
 								"register-patient"
 							]
 						},
@@ -556,6 +556,42 @@
 							]
 						},
 						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/admin/auth/patients?skip=0&limit=100' \\\n  -H 'accept: application/json'"
+					},
+					"response": []
+				},
+				{
+					"name": "admin get all users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/admin/users/?skip=0&limit=100",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users",
+								""
+							],
+							"query": [
+								{
+									"key": "skip",
+									"value": "0"
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8000/api/admin/users/?skip=0&limit=100' \\\n  -H 'accept: application/json'"
 					},
 					"response": []
 				}

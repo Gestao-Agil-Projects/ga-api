@@ -94,6 +94,7 @@ class UserUpdate(schemas.BaseUserUpdate):
     image_url: Optional[str] = None
     bio: Optional[str] = None
     frequency: Optional[ConsultationFrequency] = None
+    is_first_access: Optional[bool] = None
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):

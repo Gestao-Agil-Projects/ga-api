@@ -53,3 +53,6 @@ class UserService:
 
     async def get_all_patients(self, skip: int, limit: int) -> list[User]:
         return await self.user_dao.get_all_not_superuser(skip, limit)
+
+    async def get_all_users(self, skip: int, limit: int) -> list[User]:
+        return await self.user_dao.find_all(limit, skip)
