@@ -76,7 +76,6 @@ async def get_availability_admin(
 
 @router.get("/")
 async def get_availability_patient(
-    user: Annotated[Any, Depends(current_active_user)],
     availability_service: Annotated[
         AvailabilityService,
         Depends(get_availability_service),
